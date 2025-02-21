@@ -4,7 +4,8 @@ from common.enum import DocumentClassificationEnum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from models import DocumentType, JenisArsip
+    from models.mapping_doc_format import MappingDocFormat
+    from models import JenisArsip
 
 class DocumentFormatBase(SQLModel):
     code: str | None = Field(nullable=True)
@@ -15,7 +16,6 @@ class DocumentFormatFullBase(BaseULIDModel, DocumentFormatBase):
     pass
 
 class DocumentFormat(DocumentFormatFullBase, table=True):
-    doc_type: "DocumentType" = Relationship(back_populates="doc_formats", sa_relationship_kwargs = {"lazy": "select"})
-    jenis_arsip: "JenisArsip" = Relationship(back_populates="doc_formats", sa_relationship_kwargs = {"lazy": "select"})
+    jenis_arsips: list["JenisArsip"] = Relationship(back_populates="doc_formats", link_model=MappingDocFormat, sa_relationship_kwargs = {"lazy": "select"})
 
     
