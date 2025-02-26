@@ -10,8 +10,8 @@ class DocumentCategoryEnum(str, Enum):
     UNHOLD = "UNHOLD"
 
 class DocumentClassificationEnum(str, Enum):
-    ARSIP_AJB = "ARSIP_AJB"
-    ARSIP_HOLDING = "ARSIP_HOLDING"
+    ARSIP_AJB = "ARSIP AJB"
+    ARSIP_HOLDING = "ARSIP HOLDING"
     PBB = "PBB"
     PBT = "PBT"
     SPH_PJB_PPJB = "SPH/PJB/PPJB"
@@ -30,8 +30,8 @@ class JenisArsipEnum(str, Enum):
 
 class TipeDataEnum(str, Enum):
     ENUM = "ENUM"
-    DATE_PICKER = "DATE_PICKER"
-    DATE_TIME_PICKER = "DATE_TIME_PICKER"
+    DATE_PICKER = "DATE PICKER"
+    DATE_TIME_PICKER = "DATE TIMEPICKER"
     STRING = "STRING"
     INTEGER = "INTEGER"
     DECIMAL = "DECIMAL"

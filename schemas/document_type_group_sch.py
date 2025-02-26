@@ -1,4 +1,4 @@
-from models.document_type_model import DocumentTypeGroupBase, DocumentTypeGroupFullBase
+from models.document_type_group_model import DocumentTypeGroupBase, DocumentTypeGroupFullBase
 from models.base_model import SQLModel
 
 

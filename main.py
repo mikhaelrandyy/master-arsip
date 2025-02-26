@@ -19,9 +19,9 @@ def init_app():
     app = FastAPI(title="Master Arsip",
                   description=description,
                   version="2.0",
-                  docs_url="/arsip-dev/docs",
-                  redoc_url="/arsip-dev/redoc",
-                  openapi_url="/arsip-dev/openapi.json")
+                  docs_url="/arsip/docs",
+                  redoc_url="/arsip/redoc",
+                  openapi_url="/arsip/openapi.json")
 
     @app.get("/")
     async def home():
@@ -46,7 +46,7 @@ def init_app():
         allow_headers=['*'],
     )
 
-    app.include_router(api.api_router, prefix="/arsip-dev")
+    app.include_router(api.api_router, prefix="/arsip")
     add_pagination(app)
 
     gunicorn_error_logger = logging.getLogger("gunicorn.error")

@@ -1,3 +1,7 @@
 from .document_type_crud import document_type
 from .document_format_crud import document_format
-
+from .document_type_group import document_type_group
+from .doc_format_jenis_arsip_doc_type_link_crud import doc_format_jenis_arsip__doc_type_link
+from .jenis_kolom_crud import jenis_kolom
+from .alashak_crud import alashak
+from .doc_type_jenis_kolom_link_crud import doc_type_jenis_kolom_link

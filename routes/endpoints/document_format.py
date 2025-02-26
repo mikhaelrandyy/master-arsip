@@ -38,27 +38,31 @@ async def get_by_id(id: str):
     
     return create_response(data=obj)
 
-@router.post("", response_model=PostResponseBaseSch[list[DocumentFormatSch]], status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=PostResponseBaseSch[DocumentFormatSch], status_code=status.HTTP_201_CREATED)
 async def create(request: Request, sch: DocumentFormatCreateSch):
     
     """Create a new object"""
-    if hasattr(request.state, 'login_user'):
-        login_user=request.state.login_user
-    obj = await crud.document_format.create(sch=sch, created_by=login_user.client_id)
+    # if hasattr(request.state, 'login_user'):
+    #     login_user=request.state.login_user
+    # obj = await crud.document_format.create(sch=sch, created_by=login_user.client_id)
+    obj = await crud.document_format.create(obj_in=sch)
+
     return create_response(data=obj)
 
 @router.put("/{id}", response_model=PostResponseBaseSch[DocumentFormatByIdSch], status_code=status.HTTP_201_CREATED)
 async def update(id: str, request: Request, obj_new: DocumentFormatUpdateSch):
     
-    if hasattr(request.state, 'login_user'):
-        login_user = request.state.login_user
+    # if hasattr(request.state, 'login_user'):
+    #     login_user = request.state.login_user
 
     obj_current = await crud.document_format.get(id=id)
 
     if not obj_current:
         raise HTTPException(status_code=404, detail=f"Document Type Group tidak ditemukan")
 
-    obj_updated = await crud.document_format.update(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
+    # obj_updated = await crud.document_format.update(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
+    obj_updated = await crud.document_format.update(obj_current=obj_current, obj_new=obj_new)
+
     response_obj = await crud.document_format.get_by_id(id=obj_updated.id)
     return create_response(data=response_obj)
 
