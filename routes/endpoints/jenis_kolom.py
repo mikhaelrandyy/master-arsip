@@ -42,18 +42,24 @@ async def get_by_id(id: str):
 async def create(request: Request, sch: JenisKolomCreateSch):
     
     """Create a new object"""
-    obj = await crud.jenis_kolom.create(obj_in=sch)
+    if hasattr(request.state, 'login_user'):
+        login_user=request.state.login_user
+
+    obj = await crud.jenis_kolom.create(obj_in=sch, created_by=login_user.client_id)
     return create_response(data=obj)
 
 @router.put("/{id}", response_model=PostResponseBaseSch[JenisKolomByIdSch], status_code=status.HTTP_201_CREATED)
 async def update(id: str, request: Request, obj_new: JenisKolomUpdateSch):
+
+    if hasattr(request.state, 'login_user'):
+        login_user=request.state.login_user
     
     obj_current = await crud.jenis_kolom.get(id=id)
 
     if not obj_current:
         raise HTTPException(status_code=404, detail=f"Jenis Kolom tidak ditemukan")
 
-    obj_updated = await crud.jenis_kolom.update(obj_current=obj_current, obj_new=obj_new)
+    obj_updated = await crud.jenis_kolom.update(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
     response_obj = await crud.jenis_kolom.get_by_id(id=obj_updated.id)
     return create_response(data=response_obj)
 

@@ -2,7 +2,7 @@ from fastapi import APIRouter, status, HTTPException, Request, Depends
 from sqlmodel import select, or_
 from sqlalchemy.orm import selectinload
 from fastapi_pagination import Params
-from schemas.doc_type_jenis_kolom_sch import (DocTypeJenisKolomLinkSch, DocTypeJenisKolomLinkUpdateSch, DocTypeJenisKolomLinkCreateSch, DocTypeJenisKolomLinkByIdSch)
+from schemas.doc_type_jenis_kolom_link_sch import DocTypeJenisKolomLinkSch, DocTypeJenisKolomLinkUpdateSch, DocTypeJenisKolomLinkForMappingSch, DocTypeJenisKolomLinkByIdSch
 from schemas.response_sch import (PostResponseBaseSch, GetResponseBaseSch, GetResponsePaginatedSch, create_response)
 from models.doc_type_jenis_kolom_model import DocTypeJenisKolomLink
 import crud
@@ -38,22 +38,28 @@ async def get_by_id(id: str):
     
     return create_response(data=obj)
 
-@router.post("", response_model=PostResponseBaseSch[DocTypeJenisKolomLinkSch], status_code=status.HTTP_201_CREATED)
-async def create(request: Request, sch: DocTypeJenisKolomLinkCreateSch):
+@router.post("", response_model=PostResponseBaseSch[DocTypeJenisKolomLinkForMappingSch], status_code=status.HTTP_201_CREATED)
+async def create(request: Request, sch: DocTypeJenisKolomLinkForMappingSch):
     
     """Create a new object"""
-    obj = await crud.doc_type_jenis_kolom_link.create(obj_in=sch)
+    if hasattr(request.state, 'login_user'):
+        login_user=request.state.login_user
+
+    obj = await crud.doc_type_jenis_kolom_link.create_mapping(sch=sch, created_by=login_user.client_id)
     return create_response(data=obj)
 
 @router.put("/{id}", response_model=PostResponseBaseSch[DocTypeJenisKolomLinkByIdSch], status_code=status.HTTP_201_CREATED)
 async def update(id: str, request: Request, obj_new: DocTypeJenisKolomLinkUpdateSch):
     
+    if hasattr(request.state, 'login_user'):
+        login_user = request.state.login_user
+
     obj_current = await crud.doc_type_jenis_kolom_link.get(id=id)
 
     if not obj_current:
-        raise HTTPException(status_code=404, detail=f"Data tidak ditemukan")
+        raise HTTPException(status_code=404, detail=f"Document Type tidak ditemukan")
 
-    obj_updated = await crud.doc_type_jenis_kolom_link.update(obj_current=obj_current, obj_new=obj_new)
+    obj_updated = await crud.doc_type_jenis_kolom_link.update(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
     response_obj = await crud.doc_type_jenis_kolom_link.get_by_id(id=obj_updated.id)
     return create_response(data=response_obj)
 

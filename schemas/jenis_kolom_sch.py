@@ -14,3 +14,5 @@ class JenisKolomUpdateSch(JenisKolomBase):
 class JenisKolomByIdSch(JenisKolomFullBase):
     pass
 
+class jenisKolomByIdForMappingSch(SQLModel):
+    id: str | None

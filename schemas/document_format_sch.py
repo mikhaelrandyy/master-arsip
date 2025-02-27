@@ -16,6 +16,10 @@ class DocumentFormatUpdateSch(DocumentFormatBase):
 class DocumentFormatByIdSch(DocumentFormatFullBase):
     pass
 
-class DocumentFormatForDocTypeSch(DocumentFormatBase):
+class DocumentFormatForCreateUpdateDocTypeSch(DocumentFormatBase):
+    id: str | None
+    jenis_arsip:JenisArsipEnum
+
+class DocFormatForDocTypeSch(SQLModel):
     id: str | None
     jenis_arsip:JenisArsipEnum

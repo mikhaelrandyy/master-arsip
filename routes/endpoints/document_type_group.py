@@ -42,24 +42,24 @@ async def get_by_id(id: str):
 async def create(request: Request, sch: DocumentTypeGroupCreateSch):
     
     """Create a new object"""
-    # if hasattr(request.state, 'login_user'):
-    #     login_user=request.state.login_user
-    obj = await crud.document_type_group.create(obj_in=sch)
+    if hasattr(request.state, 'login_user'):
+        login_user=request.state.login_user
+    obj = await crud.document_type_group.create(obj_in=sch, created_by=login_user.id)
 
     return create_response(data=obj)
 
 @router.put("/{id}", response_model=PostResponseBaseSch[DocumentTypeGroupByIdSch], status_code=status.HTTP_201_CREATED)
 async def update(id: str, request: Request, obj_new: DocumentTypeGroupUpdateSch):
     
-    # if hasattr(request.state, 'login_user'):
-    #     login_user = request.state.login_user
+    if hasattr(request.state, 'login_user'):
+        login_user = request.state.login_user
 
     obj_current = await crud.document_type_group.get(id=id)
 
     if not obj_current:
         raise HTTPException(status_code=404, detail=f"Document Type Group tidak ditemukan")
 
-    obj_updated = await crud.document_type_group.update(obj_current=obj_current, obj_new=obj_new)
+    obj_updated = await crud.document_type_group.update(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.id)
     response_obj = await crud.document_type_group.get_by_id(id=obj_updated.id)
     return create_response(data=response_obj)
 

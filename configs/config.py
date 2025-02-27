@@ -5,6 +5,9 @@ class Settings(BaseSettings):
     OAUTH2_URL: str = ""
     OAUTH2_TOKEN: str = ""
     DB_CONFIG: str
-
+    AZURE_TENANT_ID: str 
+    AZURE_CLIENT_ID: str
+    AZURE_CLIENT_SECRET: str
+    VS_AZURE_SCOPE: str
 
 settings = Settings()

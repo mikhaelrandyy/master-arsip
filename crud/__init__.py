@@ -5,3 +5,5 @@ from .doc_format_jenis_arsip_doc_type_link_crud import doc_format_jenis_arsip__d
 from .jenis_kolom_crud import jenis_kolom
 from .alashak_crud import alashak
 from .doc_type_jenis_kolom_link_crud import doc_type_jenis_kolom_link
+from .document_arsip_crud import document_arsip
+from .doc_type_jenis_kolom_crud import doc_type_jenis_kolom_link
