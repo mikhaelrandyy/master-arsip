@@ -44,7 +44,7 @@ async def create(request: Request, sch: DocumentFormatCreateSch):
     """Create a new object"""
     if hasattr(request.state, 'login_user'):
         login_user=request.state.login_user
-    obj = await crud.document_format.create(sch=sch, created_by=login_user.client_id)
+    obj = await crud.document_format.create(obj_in=sch, created_by=login_user.client_id)
 
     return create_response(data=obj)
 

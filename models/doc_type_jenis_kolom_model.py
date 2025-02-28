@@ -1,14 +1,18 @@
-from models.base_model import BaseULIDModel
-from sqlmodel import SQLModel, Field
-from common.enum import JenisArsipEnum
+from models.base_model import BaseULIDModel, SQLModel
+from sqlmodel import Field, Relationship
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from models import DocumentType
 
-class DocTypeJenisKolomLinkBase(SQLModel):
-    doc_type_id: str = Field(nullable=True, foreign_key='document_type.id', primary_key=True)
-    jenis_kolom_id: str = Field(nullable=True, foreign_key='jenis_kolom.id', primary_key=True)
+class DoctypeJeniskolomBase(SQLModel):
+    doc_type_id: str = Field(nullable=False, foreign_key='document_type.id', primary_key=True)
+    jenis_kolom_id: str = Field(nullable=False, foreign_key='jenis_kolom.id', primary_key=True)
     
-class DocTypeJenisKolomLinkFullBase(BaseULIDModel, DocTypeJenisKolomLinkBase):
-    pass
+class DoctypeJeniskolom(DoctypeJeniskolomBase, table=True):
+    document_type: "DocumentType" = Relationship(sa_relationship_kwargs = {"lazy": "select"})
 
-class DocTypeJenisKolomLink(DocTypeJenisKolomLinkFullBase, table=True):
-    pass
+    @property
+    def document_type_name(self) -> str | None:
+        return getattr(getattr(self, 'document_type', None), 'name', None)
+    

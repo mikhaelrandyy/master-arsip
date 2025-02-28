@@ -1,8 +1,8 @@
 from models.base_model import BaseULIDModel
 from sqlmodel import SQLModel, Field, Relationship
 from typing import TYPE_CHECKING
-from models.doc_format_jenis_arsip_doc_type_model import DocFormatJenisArsipDocTypeLink
-from models.doc_type_jenis_kolom_model import DocTypeJenisKolomLink
+from models.doc_format_jenis_arsip_doc_type_model import DocformatJenisarsipDoctype
+from models.doc_type_jenis_kolom_model import DoctypeJeniskolom
 
 if TYPE_CHECKING:
     from models import DocumentTypeGroup, DocumentFormat, Alashak, JenisKolom
@@ -21,6 +21,6 @@ class DocumentTypeFullBase(BaseULIDModel, DocumentTypeBase):
 
 class DocumentType(DocumentTypeFullBase, table=True):
     alashak: "Alashak" = Relationship(sa_relationship_kwargs = {"lazy": "select"})
-    doc_type_group: "DocumentTypeGroup" = Relationship(back_populates="doc_types", sa_relationship_kwargs = {"lazy": "select"})
-    doc_formats: list["DocumentFormat"] = Relationship(back_populates="doc_types", link_model=DocFormatJenisArsipDocTypeLink, sa_relationship_kwargs = {"lazy": "select"})
-    jenis_koloms: list["JenisKolom"] = Relationship(back_populates="doc_types", link_model=DocTypeJenisKolomLink, sa_relationship_kwargs={"lazy": "select"})
+    document_type_group: "DocumentTypeGroup" = Relationship(back_populates="document_types", sa_relationship_kwargs = {"lazy": "select"})
+    document_formats: list["DocumentFormat"] = Relationship(link_model=DocformatJenisarsipDoctype, sa_relationship_kwargs = {"lazy": "select", "viewonly":True})
+    # jenis_koloms: list["JenisKolom"] = Relationship(link_model=DoctypeJeniskolom, sa_relationship_kwargs={"lazy": "select"})

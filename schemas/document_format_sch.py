@@ -8,7 +8,7 @@ class DocumentFormatCreateSch(DocumentFormatBase):
     pass
 
 class DocumentFormatSch(DocumentFormatFullBase):
-    pass
+    jenis_arsip:str | None
 
 class DocumentFormatUpdateSch(DocumentFormatBase):
     pass
@@ -16,10 +16,6 @@ class DocumentFormatUpdateSch(DocumentFormatBase):
 class DocumentFormatByIdSch(DocumentFormatFullBase):
     pass
 
-class DocumentFormatForCreateUpdateDocTypeSch(DocumentFormatBase):
-    id: str | None
-    jenis_arsip:JenisArsipEnum
-
 class DocFormatForDocTypeSch(SQLModel):
     id: str | None
-    jenis_arsip:JenisArsipEnum
+    jenis_arsip:str | None

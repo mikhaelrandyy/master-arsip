@@ -2,7 +2,7 @@ from models.base_model import BaseULIDModel
 from sqlmodel import SQLModel, Field, Relationship
 from common.enum import TipeDataEnum
 from typing import TYPE_CHECKING
-from models.doc_type_jenis_kolom_model import DocTypeJenisKolomLink
+from models.doc_type_jenis_kolom_model import DoctypeJeniskolom
 from models.doc_arsip_kolom_model import DocArsipKolomLink
 
 
@@ -20,7 +20,7 @@ class JenisKolomFullBase(BaseULIDModel, JenisKolomBase):
     pass
 
 class JenisKolom(JenisKolomFullBase, table=True):
-    doc_types: list["DocumentType"] = Relationship(back_populates="jenis_koloms", link_model=DocTypeJenisKolomLink, sa_relationship_kwargs={"lazy": "select"})
+    # document_types: list["DocumentType"] = Relationship(back_populates="jenis_koloms", link_model=DoctypeJeniskolom, sa_relationship_kwargs={"lazy": "select"})
     doc_arsips: list["DocumentArsip"] = Relationship(back_populates="jenis_koloms", link_model=DocArsipKolomLink, sa_relationship_kwargs={"lazy": "select"})
 
     

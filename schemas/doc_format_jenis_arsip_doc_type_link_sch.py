@@ -1,16 +1,16 @@
-from models.doc_format_jenis_arsip_doc_type_model import DocFormatJenisArsipDocTypeLinkBase, DocFormatJenisArsipDocTypeLinkFullBase
+from models.doc_format_jenis_arsip_doc_type_model import DocformatJenisarsipDoctypeBase
 from models.base_model import SQLModel
 
 
-class DocFormatJenisArsipDocTypeLinkCreateSch(DocFormatJenisArsipDocTypeLinkBase):
+class DocFormatJenisArsipDocTypeCreateSch(DocformatJenisarsipDoctypeBase):
     pass
 
-class DocFormatJenisArsipDocTypeLinkSch(DocFormatJenisArsipDocTypeLinkFullBase):
+class DocFormatJenisArsipDocTypeSch(DocformatJenisarsipDoctypeBase):
     pass 
 
-class DocFormatJenisArsipDocTypeLinkUpdateSch(DocFormatJenisArsipDocTypeLinkBase):
+class DocFormatJenisArsipDocTypeUpdateSch(DocformatJenisarsipDoctypeBase):
     pass
 
-class DocFormatJenisArsipDocTypeLinkByIdSch(DocFormatJenisArsipDocTypeLinkFullBase):
+class DocFormatJenisArsipDocTypeByIdSch(DocformatJenisarsipDoctypeBase):
     pass
 

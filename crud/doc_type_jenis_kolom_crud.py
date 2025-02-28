@@ -2,39 +2,40 @@ from fastapi_async_sqlalchemy import db
 from sqlmodel import and_, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from crud.base_crud import CRUDBase
-from models import DocTypeJenisKolomLink
-from schemas.doc_type_jenis_kolom_link_sch import DocTypeJenisKolomLinkSch, DocTypeJenisKolomLinkCreateSch, DocTypeJenisKolomLinkUpdateSch, DocTypeJenisKolomLinkForMappingSch
-from schemas.jenis_kolom_sch import JenisKolomCreateSch
+from models import DoctypeJeniskolom
+from schemas.doc_type_jenis_kolom_sch import DocTypeJenisKolomSch, DocTypeJenisKolomCreateSch, DocTypeJenisKolomUpdateSch, DocTypeJenisKolomForMappingSch, DocTypeJenisKolomMappingSch
+import crud
 
 
+class CRUDMappingDocTypeJenisKolomLink(CRUDBase[DocTypeJenisKolomSch, DocTypeJenisKolomCreateSch, DocTypeJenisKolomUpdateSch]):
+    async def get_by_id(self, *, id:str) -> DocTypeJenisKolomSch:
 
-class CRUDMappingDocTypeJenisKolomLink(CRUDBase[DocTypeJenisKolomLinkSch, DocTypeJenisKolomLinkCreateSch, DocTypeJenisKolomLinkUpdateSch]):
-    async def get_by_id(self, *, id:str) -> DocTypeJenisKolomLinkSch:
-
-        query = select(DocTypeJenisKolomLink)
-        query = query.where(DocTypeJenisKolomLink.id == id)
+        query = select(DoctypeJeniskolom)
+        query = query.where(DoctypeJeniskolom.id == id)
         response = await db.session.execute(query)
         return response.scalar_one_or_none()
     
-    async def create_mapping(self, *, sch: DocTypeJenisKolomLinkForMappingSch, created_by: str | None, db_session: AsyncSession | None = None) -> DocTypeJenisKolomLinkForMappingSch:
+    async def create_mapping_doc_type_jenis_kolom(self, *, sch: DocTypeJenisKolomForMappingSch, created_by: str | None, db_session: AsyncSession | None = None) -> list[DocTypeJenisKolomMappingSch]:
         db_session = db_session or db.session
-        
-        new_documents: list[DocTypeJenisKolomLinkCreateSch] = []
+
+        jumlah_jenis_kolom = len(sch.jenis_koloms)
+        new_documents: list[DocTypeJenisKolomCreateSch] = []
+        doc_arsips: list[DocTypeJenisKolomMappingSch] = []
 
         for jns in sch.jenis_koloms:
-            obj_in = DocTypeJenisKolomLinkCreateSch(doc_type_id=sch.doc_type_id, jenis_kolom_id=jns)
-            new_documents.append(obj_in)
-            mapping_db = DocTypeJenisKolomLink.model_validate(obj_in)
-
-            if created_by:
-                mapping_db.created_by = mapping_db.updated_by = created_by
-                
+            mapping_db = DoctypeJeniskolom(doc_type_id=sch.doc_type_id, jenis_kolom_id=jns)
             db_session.add(mapping_db) 
+            new_documents.append(mapping_db)
 
-        obj_mapping = DocTypeJenisKolomLinkForMappingSch(doc_type_id=sch.doc_type_id, jenis_koloms=[jns for jns in sch.jenis_koloms])
+        await db_session.flush()
+
+        for x in new_documents:
+            obj_doc_type = await crud.document_type.get(id=x.doc_type_id)
+            obj_mapping = DocTypeJenisKolomMappingSch(document_type_name=obj_doc_type.name, doc_type_id=obj_doc_type.id, jumlah_jenis_kolom=jumlah_jenis_kolom)
+            doc_arsips.append(obj_mapping)
 
         await db_session.commit()
 
-        return obj_mapping
+        return doc_arsips
 
-doc_type_jenis_kolom_link = CRUDMappingDocTypeJenisKolomLink(DocTypeJenisKolomLink)
+doc_type_jenis_kolom = CRUDMappingDocTypeJenisKolomLink(DoctypeJeniskolom)

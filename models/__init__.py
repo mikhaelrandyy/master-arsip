@@ -4,6 +4,6 @@ from .document_type_model import DocumentType
 from .alashak_model import Alashak
 from .jenis_kolom_model  import JenisKolom
 from .document_arsip_model import DocumentArsip
-from .doc_format_jenis_arsip_doc_type_model import DocFormatJenisArsipDocTypeLink
+from .doc_format_jenis_arsip_doc_type_model import DocformatJenisarsipDoctype
+from .doc_type_jenis_kolom_model import DoctypeJeniskolom
 from .doc_arsip_kolom_model import DocArsipKolomLink
-from .doc_type_jenis_kolom_model import DocTypeJenisKolomLink

@@ -1,9 +1,9 @@
 from fastapi import APIRouter, status, HTTPException, Request, Depends
 from sqlmodel import select, or_
-from sqlalchemy.orm import selectinload
 from fastapi_pagination import Params
-from schemas.document_type_sch import (DocumentTypeSch, DocumentTypeUpdateSch, DocumentTypeCreateSch, DocumentTypeByIdSch)
 from schemas.response_sch import (PostResponseBaseSch, GetResponseBaseSch, GetResponsePaginatedSch, create_response)
+from schemas.document_type_sch import (DocumentTypeSch, DocumentTypeUpdateSch, DocumentTypeCreateSch, DocumentTypeByIdSch)
+from schemas.doc_type_jenis_kolom_sch import DocTypeJenisKolomForMappingSch, DocTypeJenisKolomMappingSch
 from models.document_type_model import DocumentType
 import crud
 from utils.exceptions.common_exception import IdNotFoundException
@@ -46,6 +46,7 @@ async def create(request: Request, sch: DocumentTypeCreateSch):
         login_user=request.state.login_user
 
     obj = await crud.document_type.create_doc_type_and_mapping(sch=sch, created_by=login_user.client_id)
+
     return create_response(data=obj)
 
 @router.put("/{id}", response_model=PostResponseBaseSch[DocumentTypeByIdSch], status_code=status.HTTP_201_CREATED)
@@ -59,9 +60,20 @@ async def update(id: str, request: Request, obj_new: DocumentTypeUpdateSch):
     if not obj_current:
         raise HTTPException(status_code=404, detail=f"Document Type tidak ditemukan")
 
-    obj_updated = await crud.document_type.update(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
+    obj_updated = await crud.document_type.update_doc_type_and_mapping(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
     response_obj = await crud.document_type.get_by_id(id=obj_updated.id)
     return create_response(data=response_obj)
+
+@router.post("/mapping/jenis-kolom", response_model=PostResponseBaseSch[list[DocTypeJenisKolomMappingSch]], status_code=status.HTTP_201_CREATED)
+async def create_mapping_doctype_jeniskolom(request: Request, sch: DocTypeJenisKolomForMappingSch):
+    
+    """Create a new object"""
+    if hasattr(request.state, 'login_user'):
+        login_user=request.state.login_user
+
+    objs = await crud.doc_type_jenis_kolom.create_mapping_doc_type_jenis_kolom(sch=sch, created_by=login_user.client_id)
+
+    return create_response(data=objs)
 
 
 
