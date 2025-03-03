@@ -4,7 +4,7 @@ from sqlalchemy.orm import selectinload
 from fastapi_pagination import Params
 from schemas.document_format_sch import (DocumentFormatSch, DocumentFormatUpdateSch, DocumentFormatCreateSch, DocumentFormatByIdSch)
 from schemas.response_sch import (PostResponseBaseSch, GetResponseBaseSch, GetResponsePaginatedSch, create_response)
-from models.document_format_model import DocumentFormat
+from models.doc_format_model import DocFormat
 import crud
 from utils.exceptions.common_exception import IdNotFoundException
 
@@ -13,7 +13,7 @@ router = APIRouter()
 @router.get("", response_model=GetResponsePaginatedSch[DocumentFormatSch])
 async def get_list(params: Params=Depends()):
 
-    query = select(DocumentFormat)
+    query = select(DocFormat)
 
     objs = await crud.document_format.get_multi_paginated_ordered(query=query, params=params)
 
@@ -22,7 +22,7 @@ async def get_list(params: Params=Depends()):
 @router.get("/no-page", response_model=GetResponseBaseSch[list[DocumentFormatSch]])
 async def get_no_page():
 
-    query = select(DocumentFormat)
+    query = select(DocFormat)
 
     objs = await crud.document_format.get_all_ordered(query=query, order_by="created_at")
 
@@ -34,7 +34,7 @@ async def get_by_id(id: str):
     obj = await crud.document_format.get_by_id(id=id)
 
     if obj is None:
-        raise IdNotFoundException(DocumentFormat, id)
+        raise IdNotFoundException(DocFormat, id)
     
     return create_response(data=obj)
 

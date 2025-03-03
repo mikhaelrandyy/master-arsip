@@ -1,17 +1,17 @@
-from models.jenis_kolom_model import JenisKolomBase, JenisKolomFullBase
+from models.type_column_model import ColumnTypeBase, ColumnTypeFullBase
 from models.base_model import SQLModel
 
 
-class JenisKolomCreateSch(JenisKolomBase):
+class JenisKolomCreateSch(ColumnTypeBase):
     pass
 
-class JenisKolomSch(JenisKolomFullBase):
+class JenisKolomSch(ColumnTypeFullBase):
     pass 
 
-class JenisKolomUpdateSch(JenisKolomBase):
+class JenisKolomUpdateSch(ColumnTypeBase):
     pass
 
-class JenisKolomByIdSch(JenisKolomFullBase):
+class JenisKolomByIdSch(ColumnTypeFullBase):
     pass
 
 class jenisKolomByIdForMappingSch(SQLModel):

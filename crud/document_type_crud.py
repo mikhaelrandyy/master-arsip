@@ -5,28 +5,28 @@ from sqlalchemy.orm import selectinload, joinedload
 from sqlmodel.ext.asyncio.session import AsyncSession
 from fastapi.encoders import jsonable_encoder
 from crud.base_crud import CRUDBase
-from models import DocumentType, DocformatJenisarsipDoctype, DocumentFormat
+from models import DocType, DocTypeArchive, DocFormat
 from schemas.document_type_sch import DocumentTypeCreateSch, DocumentTypeUpdateSch
 from schemas.doc_format_jenis_arsip_doc_type_link_sch import DocFormatJenisArsipDocTypeCreateSch
 from common.generator import generate_code
 import crud
 
 
-class CRUDDocumentType(CRUDBase[DocumentType, DocumentTypeCreateSch, DocumentTypeUpdateSch]):
-    async def get_by_id(self, *, id:str) -> DocumentType:
+class CRUDDocumentType(CRUDBase[DocType, DocumentTypeCreateSch, DocumentTypeUpdateSch]):
+    async def get_by_id(self, *, id:str) -> DocType:
 
-        query = select(DocumentType)
-        query = query.where(DocumentType.id == id)
-        query = query.options(selectinload(DocumentType.jenis_koloms), selectinload(DocumentType.document_formats
-                    ).options(joinedload(DocumentFormat.doc_format_link)))
+        query = select(DocType)
+        query = query.where(DocType.id == id)
+        query = query.options(selectinload(DocType.jenis_koloms), selectinload(DocType.document_formats
+                    ).options(joinedload(DocFormat.doc_format_link)))
         response = await db.session.execute(query)
         return response.scalar_one_or_none()
     
-    async def create_doc_type_and_mapping(self, *, sch:DocumentTypeCreateSch, created_by:str, db_session: AsyncSession | None = None) -> DocumentType:
+    async def create_doc_type_and_mapping(self, *, sch:DocumentTypeCreateSch, created_by:str, db_session: AsyncSession | None = None) -> DocType:
         db_session = db_session or db.session
 
         sch.code = generate_code(format_code="CJD")
-        document_type = DocumentType.model_validate(sch.model_dump())
+        document_type = DocType.model_validate(sch.model_dump())
 
         if created_by:
             document_type.created_by = created_by
@@ -44,14 +44,14 @@ class CRUDDocumentType(CRUDBase[DocumentType, DocumentTypeCreateSch, DocumentTyp
                                                                 doc_type_id=document_type.id,
                                                                 jenis_arsip=obj.jenis_arsip)
                 
-            obj_mapping_db = DocformatJenisarsipDoctype.model_validate(obj_mapping.model_dump())
+            obj_mapping_db = DocTypeArchive.model_validate(obj_mapping.model_dump())
             db_session.add(obj_mapping_db)
             
         await db_session.commit()
 
         return document_type
 
-    async def update_doc_type_and_mapping(self, *, obj_current:DocumentType, obj_new:DocumentTypeUpdateSch, updated_by:str, db_session: AsyncSession | None = None) -> DocumentType:
+    async def update_doc_type_and_mapping(self, *, obj_current:DocType, obj_new:DocumentTypeUpdateSch, updated_by:str, db_session: AsyncSession | None = None) -> DocType:
         db_session = db_session or db.session
 
         obj_data = jsonable_encoder(obj_current)
@@ -75,7 +75,7 @@ class CRUDDocumentType(CRUDBase[DocumentType, DocumentTypeCreateSch, DocumentTyp
                 if not doc_format:
                     raise HTTPException(status_code=404, detail=f"Document Format tidak tersedia")
 
-                mapping_db = DocformatJenisarsipDoctype(doc_format_id=dt.id, doc_type_id=obj_current.id, jenis_arsip=dt.jenis_arsip)
+                mapping_db = DocTypeArchive(doc_format_id=dt.id, doc_type_id=obj_current.id, jenis_arsip=dt.jenis_arsip)
                 db_session.add(mapping_db)
             else:
                 current_doc_type_and_mapping.remove(obj_doc_format)
@@ -90,4 +90,4 @@ class CRUDDocumentType(CRUDBase[DocumentType, DocumentTypeCreateSch, DocumentTyp
         return obj_current
 
      
-document_type = CRUDDocumentType(DocumentType)
+document_type = CRUDDocumentType(DocType)

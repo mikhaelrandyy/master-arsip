@@ -1,16 +1,16 @@
-from models.document_type_group_model import DocumentTypeGroupBase, DocumentTypeGroupFullBase
+from models.doc_type_group_model import DocTypeGroupBase, DocTypeGroupFullBase
 from models.base_model import SQLModel
 
 
-class DocumentTypeGroupCreateSch(DocumentTypeGroupBase):
+class DocumentTypeGroupCreateSch(DocTypeGroupBase):
     pass
 
-class DocumentTypeGroupSch(DocumentTypeGroupFullBase):
+class DocumentTypeGroupSch(DocTypeGroupFullBase):
     pass 
 
-class DocumentTypeGroupUpdateSch(DocumentTypeGroupBase):
+class DocumentTypeGroupUpdateSch(DocTypeGroupBase):
     pass
 
-class DocumentTypeGroupByIdSch(DocumentTypeGroupFullBase):
+class DocumentTypeGroupByIdSch(DocTypeGroupFullBase):
     pass
 

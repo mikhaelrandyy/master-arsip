@@ -1,18 +1,18 @@
-from models.doc_type_jenis_kolom_model import DoctypeJeniskolomBase
+from models.doc_type_column_model import DocTypeColumnBase
 from models.base_model import SQLModel
 
 
-class DocTypeJenisKolomCreateSch(DoctypeJeniskolomBase):
+class DocTypeJenisKolomCreateSch(DocTypeColumnBase):
     pass
 
-class DocTypeJenisKolomSch(DoctypeJeniskolomBase):
+class DocTypeJenisKolomSch(DocTypeColumnBase):
     pass
 
-class DocTypeJenisKolomUpdateSch(DoctypeJeniskolomBase):
+class DocTypeJenisKolomUpdateSch(DocTypeColumnBase):
     jenis_koloms: list[str] | None
 
 
-class DocTypeJenisKolomByIdSch(DoctypeJeniskolomBase):
+class DocTypeJenisKolomByIdSch(DocTypeColumnBase):
     pass
 
 class DocTypeJenisKolomForMappingSch(SQLModel):

@@ -2,14 +2,14 @@ from fastapi_async_sqlalchemy import db
 from sqlmodel import and_, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from crud.base_crud import CRUDBase
-from models import DocumentFormat
+from models import DocFormat
 from schemas.document_format_sch import DocumentFormatCreateSch, DocumentFormatUpdateSch
 
-class CRUDDocumentFormat(CRUDBase[DocumentFormat, DocumentFormatCreateSch, DocumentFormatUpdateSch]):
-    async def get_by_id(self, *, id:str) -> DocumentFormat:
+class CRUDDocumentFormat(CRUDBase[DocFormat, DocumentFormatCreateSch, DocumentFormatUpdateSch]):
+    async def get_by_id(self, *, id:str) -> DocFormat:
 
-        query = select(DocumentFormat)
-        query = query.where(DocumentFormat.id == id)
+        query = select(DocFormat)
+        query = query.where(DocFormat.id == id)
         response = await db.session.execute(query)
         return response.scalar_one_or_none()
     
@@ -28,4 +28,4 @@ class CRUDDocumentFormat(CRUDBase[DocumentFormat, DocumentFormatCreateSch, Docum
 
 
      
-document_format = CRUDDocumentFormat(DocumentFormat)
+document_format = CRUDDocumentFormat(DocFormat)

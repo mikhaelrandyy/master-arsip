@@ -1,18 +1,18 @@
-from models.document_arsip_model import DocumentArsipBase, DocumentArsipFullBase
+from models.doc_archive_model import DocArchiveBase, DocArchiveFullBase
 from models.base_model import SQLModel
 from schemas.jenis_kolom_sch import JenisKolomCreateSch
 
 
-class DocumentArsipCreateSch(DocumentArsipBase):
+class DocumentArsipCreateSch(DocArchiveBase):
     jenis_koloms: list[JenisKolomCreateSch] | None
 
-class DocumentArsipSch(DocumentArsipFullBase):
+class DocumentArsipSch(DocArchiveFullBase):
     pass
 
-class DocumentArsipUpdateSch(DocumentArsipBase):
+class DocumentArsipUpdateSch(DocArchiveBase):
     pass
 
-class DocumentArsipByIdSch(DocumentArsipFullBase):
+class DocumentArsipByIdSch(DocArchiveFullBase):
     pass
 
     

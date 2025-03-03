@@ -4,7 +4,7 @@ from fastapi_pagination import Params
 from schemas.response_sch import PostResponseBaseSch, GetResponseBaseSch, GetResponsePaginatedSch, create_response
 from schemas.document_type_sch import (DocumentTypeSch, DocumentTypeUpdateSch, DocumentTypeCreateSch, DocumentTypeByIdSch)
 from schemas.doc_type_jenis_kolom_sch import DocTypeJenisKolomForMappingSch, DocTypeJenisKolomByIdSch, DocTypeJenisKolomUpdateSch
-from models.document_type_model import DocumentType
+from models.doc_type_model import DocType
 import crud
 from utils.exceptions.common_exception import IdNotFoundException
 
@@ -13,7 +13,7 @@ router = APIRouter()
 @router.get("", response_model=GetResponsePaginatedSch[DocumentTypeSch])
 async def get_list(params: Params=Depends()):
 
-    query = select(DocumentType)
+    query = select(DocType)
 
     objs = await crud.document_type.get_multi_paginated_ordered(query=query, params=params)
 
@@ -22,7 +22,7 @@ async def get_list(params: Params=Depends()):
 @router.get("/no-page", response_model=GetResponseBaseSch[list[DocumentTypeSch]])
 async def get_no_page():
 
-    query = select(DocumentType)
+    query = select(DocType)
 
     objs = await crud.document_type.get_all_ordered(query=query, order_by="created_at")
 
@@ -34,7 +34,7 @@ async def get_by_id(id: str):
     obj = await crud.document_type.get_by_id(id=id)
 
     if obj is None:
-        raise IdNotFoundException(DocumentType, id)
+        raise IdNotFoundException(DocType, id)
     
     return create_response(data=obj)
 

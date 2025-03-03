@@ -4,7 +4,7 @@ from sqlalchemy.orm import selectinload
 from fastapi_pagination import Params
 from schemas.jenis_kolom_sch import (JenisKolomSch, JenisKolomUpdateSch, JenisKolomCreateSch, JenisKolomByIdSch)
 from schemas.response_sch import (PostResponseBaseSch, GetResponseBaseSch, GetResponsePaginatedSch, create_response)
-from models.jenis_kolom_model import JenisKolom
+from models.type_column_model import ColumnType
 import crud
 from utils.exceptions.common_exception import IdNotFoundException
 
@@ -13,7 +13,7 @@ router = APIRouter()
 @router.get("", response_model=GetResponsePaginatedSch[JenisKolomSch])
 async def get_list(params: Params=Depends()):
 
-    query = select(JenisKolom)
+    query = select(ColumnType)
 
     objs = await crud.jenis_kolom.get_multi_paginated_ordered(query=query, params=params)
 
@@ -22,7 +22,7 @@ async def get_list(params: Params=Depends()):
 @router.get("/no-page", response_model=GetResponseBaseSch[list[JenisKolomSch]])
 async def get_no_page():
 
-    query = select(JenisKolom)
+    query = select(ColumnType)
 
     objs = await crud.jenis_kolom.get_all_ordered(query=query, order_by="created_at")
 
@@ -34,7 +34,7 @@ async def get_by_id(id: str):
     obj = await crud.jenis_kolom.get_by_id(id=id)
 
     if obj is None:
-        raise IdNotFoundException(JenisKolom, id)
+        raise IdNotFoundException(ColumnType, id)
     
     return create_response(data=obj)
 
