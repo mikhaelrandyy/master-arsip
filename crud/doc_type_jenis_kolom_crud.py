@@ -1,41 +1,88 @@
+from fastapi import HTTPException
 from fastapi_async_sqlalchemy import db
+from fastapi.encoders import jsonable_encoder
 from sqlmodel import and_, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from crud.base_crud import CRUDBase
 from models import DoctypeJeniskolom
-from schemas.doc_type_jenis_kolom_sch import DocTypeJenisKolomSch, DocTypeJenisKolomCreateSch, DocTypeJenisKolomUpdateSch, DocTypeJenisKolomForMappingSch, DocTypeJenisKolomMappingSch
+from schemas.document_type_sch import DocumentTypeSch
+from schemas.doc_type_jenis_kolom_sch import DocTypeJenisKolomSch, DocTypeJenisKolomCreateSch, DocTypeJenisKolomUpdateSch, DocTypeJenisKolomForMappingSch
+from schemas.jenis_kolom_sch import jenisKolomByIdForMappingSch
 import crud
 
 
 class CRUDMappingDocTypeJenisKolomLink(CRUDBase[DocTypeJenisKolomSch, DocTypeJenisKolomCreateSch, DocTypeJenisKolomUpdateSch]):
-    async def get_by_id(self, *, id:str) -> DocTypeJenisKolomSch:
+    async def get_by_doc_type_id(self, *, doc_type_id:str) -> list[DoctypeJeniskolom]:
 
         query = select(DoctypeJeniskolom)
-        query = query.where(DoctypeJeniskolom.id == id)
+        query = query.where(DoctypeJeniskolom.doc_type_id == doc_type_id)
+        response = await db.session.execute(query)
+        return response.scalars().all()
+
+    async def get_by_doc_type_jenis_kolom(self, *, doc_type_id: str, jenis_kolom_id:str) -> DoctypeJeniskolom:
+
+        query = select(DoctypeJeniskolom)
+        query = query.where(and_(DoctypeJeniskolom.doc_type_id == doc_type_id,
+                                 DoctypeJeniskolom.jenis_kolom_id == jenis_kolom_id))
         response = await db.session.execute(query)
         return response.scalar_one_or_none()
     
-    async def create_mapping_doc_type_jenis_kolom(self, *, sch: DocTypeJenisKolomForMappingSch, created_by: str | None, db_session: AsyncSession | None = None) -> list[DocTypeJenisKolomMappingSch]:
+    async def create_mapping_doc_type_jenis_kolom(self, *, sch: DocTypeJenisKolomForMappingSch, db_session: AsyncSession | None = None):
         db_session = db_session or db.session
-
-        jumlah_jenis_kolom = len(sch.jenis_koloms)
-        new_documents: list[DocTypeJenisKolomCreateSch] = []
-        doc_arsips: list[DocTypeJenisKolomMappingSch] = []
 
         for jns in sch.jenis_koloms:
             mapping_db = DoctypeJeniskolom(doc_type_id=sch.doc_type_id, jenis_kolom_id=jns)
             db_session.add(mapping_db) 
-            new_documents.append(mapping_db)
-
-        await db_session.flush()
-
-        for x in new_documents:
-            obj_doc_type = await crud.document_type.get(id=x.doc_type_id)
-            obj_mapping = DocTypeJenisKolomMappingSch(document_type_name=obj_doc_type.name, doc_type_id=obj_doc_type.id, jumlah_jenis_kolom=jumlah_jenis_kolom)
-            doc_arsips.append(obj_mapping)
 
         await db_session.commit()
 
-        return doc_arsips
+        return sch.doc_type_id
+    
+    async def update_mapping_doc_type_jenis_kolom(self, *, obj_new:DocTypeJenisKolomUpdateSch, db_session: AsyncSession | None = None) -> DoctypeJeniskolom:
+        db_session = db_session or db.session
+
+        # obj_current = await crud.doc_type_jenis_kolom.get_by_doc_type_id(doc_type_id=obj_new.doc_type_id)
+
+        # if not obj_current:
+        #     raise HTTPException(status_code=404, detail=f"Document Type tidak ditemukan")
+        
+        # for doc in obj_current:
+        
+        current_doctype_jeniskolom = await crud.doc_type_jenis_kolom.get_by_doc_type_id(doc_type_id=obj_new.doc_type_id)
+
+        for dt in obj_new.jenis_koloms:
+            obj_jns_kolom = await crud.doc_type_jenis_kolom.get_by_doc_type_jenis_kolom(doc_type_id=obj_new.doc_type_id, jenis_kolom_id=dt)
+
+            if obj_jns_kolom is None:
+                jns_kolom = await crud.jenis_kolom.get(id=dt)
+
+                if not jns_kolom:
+                    raise HTTPException(status_code=404, detail=f"Jenis Kolom tidak tersedia")
+                
+                mapping_db = DoctypeJeniskolom(doc_type_id=obj_new.doc_type_id, jenis_kolom_id=dt)
+                db_session.add(mapping_db)
+            else:
+                current_doctype_jeniskolom.remove(obj_jns_kolom)
+
+        for remove in current_doctype_jeniskolom:
+            await crud.doc_type_jenis_kolom.remove(doc_type_id=remove.doc_type_id, jenis_kolom_id=remove.jenis_kolom_id)
+
+        await db_session.commit()
+
+        return obj_new.doc_type_id
+    
+    async def remove(self, *, doc_type_id:str, jenis_kolom_id: str, db_session: AsyncSession | None = None) -> DoctypeJeniskolom:
+        db_session = db_session or db.session
+
+        query = select(DoctypeJeniskolom)
+        query = query.where(and_(DoctypeJeniskolom.doc_type_id == doc_type_id,
+                                 DoctypeJeniskolom.jenis_kolom_id == jenis_kolom_id))
+
+        response = await db_session.execute(query)
+        obj = response.scalar_one()
+        await db_session.delete(obj)
+        await db_session.commit()
+        return obj
+
 
 doc_type_jenis_kolom = CRUDMappingDocTypeJenisKolomLink(DoctypeJeniskolom)

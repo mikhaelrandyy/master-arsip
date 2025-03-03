@@ -11,8 +11,3 @@ class DoctypeJeniskolomBase(SQLModel):
     
 class DoctypeJeniskolom(DoctypeJeniskolomBase, table=True):
     document_type: "DocumentType" = Relationship(sa_relationship_kwargs = {"lazy": "select"})
-
-    @property
-    def document_type_name(self) -> str | None:
-        return getattr(getattr(self, 'document_type', None), 'name', None)
-    

@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from models import DocumentType
 
 class DocumentTypeGroupBase(SQLModel):
-    code: str | None = Field(nullable=True)
+    code: str | None = Field(nullable=True, unique=True)
     name: str | None = Field(nullable=True)
 
 class DocumentTypeGroupFullBase(BaseULIDModel, DocumentTypeGroupBase):

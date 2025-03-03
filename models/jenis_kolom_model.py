@@ -20,7 +20,6 @@ class JenisKolomFullBase(BaseULIDModel, JenisKolomBase):
     pass
 
 class JenisKolom(JenisKolomFullBase, table=True):
-    # document_types: list["DocumentType"] = Relationship(back_populates="jenis_koloms", link_model=DoctypeJeniskolom, sa_relationship_kwargs={"lazy": "select"})
     doc_arsips: list["DocumentArsip"] = Relationship(back_populates="jenis_koloms", link_model=DocArsipKolomLink, sa_relationship_kwargs={"lazy": "select"})
 
     

@@ -8,6 +8,7 @@ from crud.base_crud import CRUDBase
 from models import DocumentType, DocformatJenisarsipDoctype, DocumentFormat
 from schemas.document_type_sch import DocumentTypeCreateSch, DocumentTypeUpdateSch
 from schemas.doc_format_jenis_arsip_doc_type_link_sch import DocFormatJenisArsipDocTypeCreateSch
+from common.generator import generate_code
 import crud
 
 
@@ -16,13 +17,15 @@ class CRUDDocumentType(CRUDBase[DocumentType, DocumentTypeCreateSch, DocumentTyp
 
         query = select(DocumentType)
         query = query.where(DocumentType.id == id)
-        query = query.options(selectinload(DocumentType.document_formats).options(selectinload(DocumentFormat.doc_format_link)))
+        query = query.options(selectinload(DocumentType.jenis_koloms), selectinload(DocumentType.document_formats
+                    ).options(joinedload(DocumentFormat.doc_format_link)))
         response = await db.session.execute(query)
         return response.scalar_one_or_none()
     
     async def create_doc_type_and_mapping(self, *, sch:DocumentTypeCreateSch, created_by:str, db_session: AsyncSession | None = None) -> DocumentType:
         db_session = db_session or db.session
 
+        sch.code = generate_code(format_code="CJD")
         document_type = DocumentType.model_validate(sch.model_dump())
 
         if created_by:

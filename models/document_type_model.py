@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from models import DocumentTypeGroup, DocumentFormat, Alashak, JenisKolom
 
 class DocumentTypeBase(SQLModel):
-    code: str | None = Field(nullable=True)
+    code: str | None = Field(nullable=True, unique=True)
     name: str | None = Field(nullable=True)
     status: bool = Field(nullable=True)
     is_doc_asal: bool = Field(nullable=True)
@@ -23,4 +23,8 @@ class DocumentType(DocumentTypeFullBase, table=True):
     alashak: "Alashak" = Relationship(sa_relationship_kwargs = {"lazy": "select"})
     document_type_group: "DocumentTypeGroup" = Relationship(back_populates="document_types", sa_relationship_kwargs = {"lazy": "select"})
     document_formats: list["DocumentFormat"] = Relationship(link_model=DocformatJenisarsipDoctype, sa_relationship_kwargs = {"lazy": "select", "viewonly":True})
-    # jenis_koloms: list["JenisKolom"] = Relationship(link_model=DoctypeJeniskolom, sa_relationship_kwargs={"lazy": "select"})
+    jenis_koloms: list["JenisKolom"] = Relationship(link_model=DoctypeJeniskolom, sa_relationship_kwargs={"lazy": "select", "viewonly":True})
+
+    @property
+    def jumlah_jenis_koloms(self) -> int | None:
+        return len(self.jenis_koloms)

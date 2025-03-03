@@ -2,7 +2,7 @@ from models.base_model import BaseULIDModel
 from sqlmodel import SQLModel, Field
 
 class AlashakBase(SQLModel):
-    code: str | None = Field(nullable=True)
+    code: str | None = Field(nullable=True, unique=True)
     description: str | None = Field(nullable=True)
 
 class AlashakFullBase(BaseULIDModel, AlashakBase):

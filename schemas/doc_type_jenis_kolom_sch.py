@@ -9,7 +9,8 @@ class DocTypeJenisKolomSch(DoctypeJeniskolomBase):
     pass
 
 class DocTypeJenisKolomUpdateSch(DoctypeJeniskolomBase):
-    pass
+    jenis_koloms: list[str] | None
+
 
 class DocTypeJenisKolomByIdSch(DoctypeJeniskolomBase):
     pass
@@ -17,8 +18,3 @@ class DocTypeJenisKolomByIdSch(DoctypeJeniskolomBase):
 class DocTypeJenisKolomForMappingSch(SQLModel):
     doc_type_id: str | None
     jenis_koloms: list[str] | None
-
-class DocTypeJenisKolomMappingSch(SQLModel):
-    document_type_name: str | None
-    doc_type_id: str | None
-    jumlah_jenis_kolom: int | None
