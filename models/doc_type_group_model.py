@@ -13,4 +13,4 @@ class DocTypeGroupFullBase(BaseULIDModel, DocTypeGroupBase):
     pass
 
 class DocTypeGroup(DocTypeGroupFullBase, table=True):
-    document_types: list["DocType"] = Relationship(back_populates="document_type_group", sa_relationship_kwargs = {"lazy": "select"})
+    doc_types: list["DocType"] = Relationship(sa_relationship_kwargs = {"lazy": "select"})

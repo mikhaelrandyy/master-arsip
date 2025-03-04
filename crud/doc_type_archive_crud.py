@@ -3,11 +3,11 @@ from sqlmodel import and_, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from crud.base_crud import CRUDBase
 from models import DocTypeArchive
-from schemas.doc_format_jenis_arsip_doc_type_link_sch import DocFormatJenisArsipDocTypeCreateSch, DocFormatJenisArsipDocTypeUpdateSch
+from schemas.doc_type_archive_sch import DocTypeArchiveCreateSch, DocTypeArchiveUpdateSch
 from common.enum import JenisArsipEnum
 
 
-class CRUDDocFormatJenisArsipDocType(CRUDBase[DocTypeArchive, DocFormatJenisArsipDocTypeCreateSch,  DocFormatJenisArsipDocTypeUpdateSch]):
+class CRUDDocFormatJenisArsipDocType(CRUDBase[DocTypeArchive, DocTypeArchiveCreateSch,  DocTypeArchiveUpdateSch]):
     async def get_by_id(self, *, id:str) -> DocTypeArchive:
 
         query = select(DocTypeArchive)
@@ -44,4 +44,4 @@ class CRUDDocFormatJenisArsipDocType(CRUDBase[DocTypeArchive, DocFormatJenisArsi
         await db_session.commit()
         return obj
      
-doc_format_jenis_arsip__doc_type = CRUDDocFormatJenisArsipDocType(DocTypeArchive)
+doc_type_archive = CRUDDocFormatJenisArsipDocType(DocTypeArchive)

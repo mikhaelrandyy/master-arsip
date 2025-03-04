@@ -8,8 +8,8 @@ if TYPE_CHECKING:
 
 
 class DocTypeArchiveBase(SQLModel):
-    doc_format_id: str | None = Field(nullable=False, foreign_key='document_format.id', primary_key=True)
-    doc_type_id: str | None = Field(nullable=False, foreign_key='document_type.id', primary_key=True)
+    doc_format_id: str | None = Field(nullable=False, foreign_key='doc_format.id', primary_key=True)
+    doc_type_id: str | None = Field(nullable=False, foreign_key='doc_type.id', primary_key=True)
     jenis_arsip: JenisArsipEnum | None = Field(nullable=False, primary_key=True)
 
 class DocTypeArchive(DocTypeArchiveBase, table=True):

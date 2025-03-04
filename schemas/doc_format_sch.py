@@ -2,18 +2,17 @@ from models.doc_format_model import DocFormatBase, DocFormatFullBase
 from models.base_model import SQLModel
 from common.enum import JenisArsipEnum
 
-
-
-class DocumentFormatCreateSch(DocFormatBase):
+class DocFormatCreateSch(DocFormatBase):
     pass
 
-class DocumentFormatSch(DocFormatFullBase):
-    jenis_arsip:str | None
+class DocFormatSch(DocFormatFullBase):
+    pass
+    # jenis_arsip:str | None
 
-class DocumentFormatUpdateSch(DocFormatBase):
+class DocFormatUpdateSch(DocFormatBase):
     pass
 
-class DocumentFormatByIdSch(DocFormatFullBase):
+class DocFormatByIdSch(DocFormatFullBase):
     pass
 
 class DocFormatForDocTypeSch(SQLModel):

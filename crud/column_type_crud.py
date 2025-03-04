@@ -2,10 +2,10 @@ from fastapi_async_sqlalchemy import db
 from sqlmodel import and_, select
 from crud.base_crud import CRUDBase
 from models import ColumnType
-from schemas.jenis_kolom_sch import JenisKolomCreateSch, JenisKolomUpdateSch
+from schemas.column_type_sch import ColumnTypeCreateSch, ColumnTypeUpdateSch
 
 
-class CRUDJenisKolom(CRUDBase[ColumnType, JenisKolomCreateSch, JenisKolomUpdateSch]):
+class CRUDColumnType(CRUDBase[ColumnType, ColumnTypeCreateSch, ColumnTypeUpdateSch]):
     async def get_by_id(self, *, id:str) -> ColumnType:
 
         query = select(ColumnType)
@@ -13,4 +13,4 @@ class CRUDJenisKolom(CRUDBase[ColumnType, JenisKolomCreateSch, JenisKolomUpdateS
         response = await db.session.execute(query)
         return response.scalar_one_or_none()
      
-jenis_kolom = CRUDJenisKolom(ColumnType)
+column_type = CRUDColumnType(ColumnType)

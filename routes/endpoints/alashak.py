@@ -38,13 +38,13 @@ async def get_by_id(id: str):
     
     return create_response(data=obj)
 
-@router.post("", response_model=PostResponseBaseSch[list[AlashakSch]], status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=PostResponseBaseSch[AlashakSch], status_code=status.HTTP_201_CREATED)
 async def create(request: Request, sch: AlashakCreateSch):
     
     """Create a new object"""
     if hasattr(request.state, 'login_user'):
         login_user=request.state.login_user
-    obj = await crud.alashak.create(sch=sch, created_by=login_user.client_id)
+    obj = await crud.alashak.create(obj_in=sch, created_by=login_user.client_id)
     return create_response(data=obj)
 
 @router.put("/{id}", response_model=PostResponseBaseSch[AlashakByIdSch], status_code=status.HTTP_201_CREATED)

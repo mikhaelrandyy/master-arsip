@@ -14,14 +14,14 @@ class DocTypeBase(SQLModel):
     is_doc_asal: bool = Field(nullable=True)
     is_unit: bool = Field(nullable=True)
     alashak_id: str | None = Field(nullable=True, foreign_key="alashak.id")
-    doc_type_group_id: str | None = Field(nullable=True, foreign_key="document_type_group.id")
+    doc_type_group_id: str | None = Field(nullable=True, foreign_key="doc_type_group.id")
 
 class DocTypeFullBase(BaseULIDModel, DocTypeBase):
     pass
 
 class DocType(DocTypeFullBase, table=True):
     alashak: "Alashak" = Relationship(sa_relationship_kwargs = {"lazy": "select"})
-    document_type_group: "DocTypeGroup" = Relationship(back_populates="document_types", sa_relationship_kwargs = {"lazy": "select"})
+    document_type_group: "DocTypeGroup" = Relationship(back_populates="doc_types", sa_relationship_kwargs = {"lazy": "select"})
     document_formats: list["DocFormat"] = Relationship(link_model=DocTypeArchive, sa_relationship_kwargs = {"lazy": "select", "viewonly":True})
     jenis_koloms: list["ColumnType"] = Relationship(link_model=DocTypeColumn, sa_relationship_kwargs={"lazy": "select", "viewonly":True})
 

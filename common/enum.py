@@ -37,5 +37,9 @@ class TipeDataEnum(str, Enum):
     DECIMAL = "DECIMAL"
     BOOLEAN = "BOOLEAN"
 
+class CodeCounterEnum(str, Enum):
+    DOC_FORMAT = "CDF"
+    DOC_TYPE = "CJD"
+    DOC_TYPE_GROUP = "GJD"
 
 

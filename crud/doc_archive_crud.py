@@ -3,11 +3,11 @@ from sqlmodel import and_, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from crud.base_crud import CRUDBase
 from models import DocArchive, DocTypeColumn
-from schemas.document_arsip_sch import DocumentArsipCreateSch, DocumentArsipUpdateSch
-from schemas.doc_type_jenis_kolom_sch import DocTypeJenisKolomCreateSch
+from schemas.doc_archive_sch import DocArchiveCreateSch, DocArchiveUpdateSch
+from schemas.doc_type_column_sch import DocTypeColumnCreateSch
 
 
-class CRUDDocumentArsip(CRUDBase[DocArchive, DocumentArsipCreateSch, DocumentArsipUpdateSch]):
+class CRUDDocArchive(CRUDBase[DocArchive, DocArchiveCreateSch, DocArchiveUpdateSch]):
     async def get_by_id(self, *, id:str) -> DocArchive:
 
         query = select(DocArchive)
@@ -15,7 +15,7 @@ class CRUDDocumentArsip(CRUDBase[DocArchive, DocumentArsipCreateSch, DocumentArs
         response = await db.session.execute(query)
         return response.scalar_one_or_none()
     
-    async def create_doc_arsip_and_mapping(self, *, sch:DocumentArsipCreateSch, created_by: str | None, db_session: AsyncSession | None = None) -> DocArchive:
+    async def create_doc_arsip_and_mapping(self, *, sch:DocArchiveCreateSch, created_by: str | None, db_session: AsyncSession | None = None) -> DocArchive:
         db_session = db_session or db.session
 
         document_arsip = DocArchive.model_validate(sch.model_dump())
@@ -31,9 +31,9 @@ class CRUDDocumentArsip(CRUDBase[DocArchive, DocumentArsipCreateSch, DocumentArs
 
         for obj in sch.jenis_koloms:
 
-            obj_mapping = DocTypeJenisKolomCreateSch(
-                                                        doc_type_id=sch.doc_type_id,
-                                                        jenis_kolom_id=obj.id)
+            obj_mapping = DocTypeColumnCreateSch(
+                                                doc_type_id=sch.doc_type_id,
+                                                jenis_kolom_id=obj.id)
                 
             obj_mapping_db = DocTypeColumn.model_validate(obj_mapping.model_dump())
             obj_mapping_db.created_by = created_by
@@ -45,4 +45,4 @@ class CRUDDocumentArsip(CRUDBase[DocArchive, DocumentArsipCreateSch, DocumentArs
         return document_arsip
 
      
-document_arsip = CRUDDocumentArsip(DocArchive)
+doc_archive = CRUDDocArchive(DocArchive)
