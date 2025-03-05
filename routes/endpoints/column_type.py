@@ -1,5 +1,5 @@
 from fastapi import APIRouter, status, HTTPException, Request, Depends
-from sqlmodel import select, or_
+from sqlmodel import select, or_, cast, String
 from sqlalchemy.orm import selectinload
 from fastapi_pagination import Params
 from schemas.column_type_sch import (ColumnTypeSch, ColumnTypeUpdateSch, ColumnTypeCreateSch, ColumnTypeByIdSch)
@@ -11,9 +11,17 @@ from utils.exceptions.common_exception import IdNotFoundException
 router = APIRouter()
 
 @router.get("", response_model=GetResponsePaginatedSch[ColumnTypeSch])
-async def get_list(params: Params=Depends()):
+async def get_list(search: str | None = None, params: Params=Depends()):
 
     query = select(ColumnType)
+
+    if search:
+        query = query.filter(
+                or_(
+                    cast(ColumnType.name, String).ilike(f'%{search}%'),
+                    cast(ColumnType.tipe_data, String).ilike(f'%{search}%')
+                )
+            )
 
     objs = await crud.column_type.get_multi_paginated_ordered(query=query, params=params)
 
@@ -45,7 +53,7 @@ async def create(request: Request, sch: ColumnTypeCreateSch):
     if hasattr(request.state, 'login_user'):
         login_user=request.state.login_user
 
-    obj = await crud.column_type.create(obj_in=sch, created_by=login_user.client_id)
+    obj = await crud.column_type.create(sch=sch, created_by=login_user.client_id)
     return create_response(data=obj)
 
 @router.put("/{id}", response_model=PostResponseBaseSch[ColumnTypeByIdSch], status_code=status.HTTP_201_CREATED)

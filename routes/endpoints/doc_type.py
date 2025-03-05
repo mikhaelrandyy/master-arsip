@@ -1,19 +1,29 @@
 from fastapi import APIRouter, status, HTTPException, Request, Depends
-from sqlmodel import select, or_
+from sqlmodel import select, or_, cast, String
 from fastapi_pagination import Params
 from schemas.response_sch import PostResponseBaseSch, GetResponseBaseSch, GetResponsePaginatedSch, create_response
 from schemas.doc_type_sch import (DocTypeSch, DocTypeUpdateSch, DocTypeCreateSch, DocTypeByIdSch)
 from schemas.doc_type_column_sch import DocTypeColumnCreateUpdateSch
 from models.doc_type_model import DocType
+from models import DocTypeGroup, DocArchiveColumn, DocArchive
 import crud
 from utils.exceptions.common_exception import IdNotFoundException
 
 router = APIRouter()
 
 @router.get("", response_model=GetResponsePaginatedSch[DocTypeSch])
-async def get_list(params: Params=Depends()):
+async def get_list(search: str | None = None, params: Params=Depends()):
 
-    query = select(DocType)
+    query = select(DocType).outerjoin(DocTypeGroup, DocTypeGroup.id == DocType.doc_type_group_id)
+
+    if search:
+        query = query.filter(
+                or_(
+                    cast(DocType.code, String).ilike(f'%{search}%'),
+                    cast(DocType.name, String).ilike(f'%{search}%'),
+                    cast(DocTypeGroup.name, String).ilike(f'%{search}%')
+                )
+            )
 
     objs = await crud.doc_type.get_multi_paginated_ordered(query=query, params=params)
 
@@ -71,10 +81,28 @@ async def mapping_doctype_jeniskolom(request: Request, sch: DocTypeColumnCreateU
     
     """Create a new object"""
 
-    obj = await crud.doc_type_column_type.mapping_doc_type_jenis_kolom(sch=sch)
+    obj = await crud.doc_type_column_type.mapping_doc_type_column_type(sch=sch)
     doc_type = await crud.doc_type.get_by_id(id=obj)
     return create_response(data=doc_type)
 
 
+
+@router.get("/mapping/column-type", response_model=GetResponsePaginatedSch[DocTypeSch])
+async def get_list_colum_type(search: str | None = None, params: Params=Depends()):
+
+    query = select(DocArchiveColumn).outerjoin(DocArchive, DocArchive.id == DocArchiveColumn.doc_archive_id
+                                                  ).outerjoin(DocType, DocType.id == DocArchive.doc_type_id)
+
+    if search:
+        query = query.filter(
+                or_(
+                    cast(DocType.name, String).ilike(f'%{search}%'),
+                    cast(DocType.jumlah_colum_type, String).ilike(f'%{search}%')
+                )
+            )
+
+    objs = await crud.doc_type.get_multi_paginated_ordered(query=query, params=params)
+
+    return create_response(data=objs)
 
 

@@ -1,6 +1,6 @@
 from models.base_model import BaseULIDModel
 from sqlmodel import SQLModel, Field, Relationship
-from models.doc_archive_kolom_model import DocArchiveKolomLink
+from models.doc_archive_column_model import DocArchiveColumn
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -14,6 +14,6 @@ class DocArchiveFullBase(BaseULIDModel, DocArchiveBase):
     pass
 
 class DocArchive(DocArchiveFullBase, table=True):
-    column_types: list["ColumnType"] = Relationship(back_populates="doc_archives", link_model=DocArchiveKolomLink, sa_relationship_kwargs={"lazy": "select"})
+    column_types: list["ColumnType"] = Relationship(back_populates="doc_archives", link_model=DocArchiveColumn, sa_relationship_kwargs={"lazy": "select"})
     
     

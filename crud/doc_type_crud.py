@@ -18,8 +18,9 @@ class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
 
         query = select(DocType)
         query = query.where(DocType.id == id)
-        query = query.options(selectinload(DocType.jenis_koloms), selectinload(DocType.document_formats
-                    ).options(joinedload(DocFormat.doc_format_link)))
+        query = query.options(selectinload(DocType.doc_type_group)
+                    ).options(selectinload(DocType.column_types)
+                    ).options(selectinload(DocType.doc_formats))
         response = await db.session.execute(query)
         return response.scalar_one_or_none()
     

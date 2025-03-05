@@ -2,7 +2,8 @@ from models.base_model import BaseULIDModel
 from sqlmodel import SQLModel, Field, Relationship
 from common.enum import TipeDataEnum
 from typing import TYPE_CHECKING
-from models.doc_archive_kolom_model import DocArchiveKolomLink
+from models.doc_archive_column_model import DocArchiveColumn
+from models.doc_type_column_model import DocTypeColumn
 
 
 if TYPE_CHECKING:
@@ -19,6 +20,7 @@ class ColumnTypeFullBase(BaseULIDModel, ColumnTypeBase):
     pass
 
 class ColumnType(ColumnTypeFullBase, table=True):
-    doc_archives: list["DocArchive"] = Relationship(back_populates="column_types", link_model=DocArchiveKolomLink, sa_relationship_kwargs={"lazy": "select"})
+    doc_archives: list["DocArchive"] = Relationship(link_model=DocArchiveColumn, sa_relationship_kwargs={"lazy": "select"})
+
 
     

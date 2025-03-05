@@ -7,8 +7,9 @@ class DocTypeCreateSch(DocTypeBase):
     document_formats: list[DocFormatForDocTypeSch] | None
 
 class DocTypeSch(DocTypeFullBase):
-    jumlah_jenis_koloms: int | None
-    jenis_koloms: list[ColumnTypeSch] | None
+    jumlah_colum_type: int | None
+    doc_type_group_name: str | None
+    column_types: list[ColumnTypeSch] | None
 
 class DocTypeUpdateSch(DocTypeBase):
     document_formats: list[DocFormatForDocTypeSch] | None

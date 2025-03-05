@@ -33,7 +33,7 @@ class CRUDDocArchive(CRUDBase[DocArchive, DocArchiveCreateSch, DocArchiveUpdateS
 
             obj_mapping = DocTypeColumnCreateSch(
                                                 doc_type_id=sch.doc_type_id,
-                                                jenis_kolom_id=obj.id)
+                                                column_type_id=obj.id)
                 
             obj_mapping_db = DocTypeColumn.model_validate(obj_mapping.model_dump())
             obj_mapping_db.created_by = created_by

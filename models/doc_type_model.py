@@ -21,10 +21,14 @@ class DocTypeFullBase(BaseULIDModel, DocTypeBase):
 
 class DocType(DocTypeFullBase, table=True):
     alashak: "Alashak" = Relationship(sa_relationship_kwargs = {"lazy": "select"})
-    document_type_group: "DocTypeGroup" = Relationship(back_populates="doc_types", sa_relationship_kwargs = {"lazy": "select"})
-    document_formats: list["DocFormat"] = Relationship(link_model=DocTypeArchive, sa_relationship_kwargs = {"lazy": "select", "viewonly":True})
-    jenis_koloms: list["ColumnType"] = Relationship(link_model=DocTypeColumn, sa_relationship_kwargs={"lazy": "select", "viewonly":True})
+    doc_type_group: "DocTypeGroup" = Relationship(back_populates="doc_types", sa_relationship_kwargs = {"lazy": "select"})
+    doc_formats: list["DocFormat"] = Relationship(link_model=DocTypeArchive, sa_relationship_kwargs = {"lazy": "select", "viewonly":True})
+    column_types: list["ColumnType"] = Relationship(link_model=DocTypeColumn, sa_relationship_kwargs={"lazy": "select", "viewonly":True})
 
     @property
-    def jumlah_jenis_koloms(self) -> int | None:
-        return len(self.jenis_koloms)
+    def jumlah_colum_type(self) -> int | None:
+        return len(self.column_types)
+    
+    @property
+    def doc_type_group_name(self) -> str | None:
+        return getattr(getattr(self, 'document_type_group', None), 'name', None)

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, status, HTTPException, Request, Depends
-from sqlmodel import select, or_
+from sqlmodel import select, or_, String, cast
 from sqlalchemy.orm import selectinload
 from fastapi_pagination import Params
 from schemas.doc_format_sch import (DocFormatSch, DocFormatUpdateSch, DocFormatCreateSch, DocFormatByIdSch)
@@ -11,9 +11,18 @@ from utils.exceptions.common_exception import IdNotFoundException
 router = APIRouter()
 
 @router.get("", response_model=GetResponsePaginatedSch[DocFormatSch])
-async def get_list(params: Params=Depends()):
+async def get_list(search:str | None = None, params: Params=Depends()):
 
     query = select(DocFormat)
+
+    if search:
+        query = query.filter(
+                or_(
+                    cast(DocFormat.code, String).ilike(f'%{search}%'),
+                    cast(DocFormat.name, String).ilike(f'%{search}%'),
+                    cast(DocFormat.classification, String).ilike(f'%{search}%')
+                )
+            )
 
     objs = await crud.doc_format.get_multi_paginated_ordered(query=query, params=params)
 
