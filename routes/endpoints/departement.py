@@ -68,11 +68,10 @@ async def update(id: str, request: Request, obj_new: DepartementUpdateSch):
 async def create_mapping(request: Request, sch: DepartementCreateForMappingSch):
     
     """Create a new object"""
-    if hasattr(request.state, 'login_user'):
-        login_user=request.state.login_user
-    obj = await crud.departement.create_departement_mapping(sch=sch, created_by=login_user.client_id)
-    response_obj = await crud.departement.get_by_id(id=obj.id)
-    return create_response(data=response_obj)
+    
+    obj = await crud.departement.create_dept_mapping(sch=sch)
+
+    return create_response(data=obj)
 
 
 

@@ -11,7 +11,7 @@ from utils.exceptions.common_exception import IdNotFoundException
 router = APIRouter()
 
 @router.get("", response_model=GetResponsePaginatedSch[RoleSch])
-async def get_list(search:str | None = None, params: Params=Depends()):
+async def get_list(params: Params=Depends()):
 
     query = select(Role)
 

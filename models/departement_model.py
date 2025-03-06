@@ -1,10 +1,10 @@
 from models.base_model import BaseULIDModel
 from sqlmodel import SQLModel, Field, Relationship
-from models.doc_type_departement_model import DocTypeDepartement
+from models.doc_type_dept_model import DocTypeDept
 from typing  import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from models import DocType
+    from models import DocType, Worker
 
 class DepartementBase(SQLModel):
     code: str | None = Field(nullable=True, unique=True)
@@ -14,8 +14,9 @@ class DepartementFullBase(BaseULIDModel, DepartementBase):
     pass
 
 class Departement(DepartementFullBase, table=True):
-    doc_types: list["DocType"] = Relationship(link_model=DocTypeDepartement, sa_relationship_kwargs={"lazy": "select", "viewonly":True})
-    
+    doc_types: list["DocType"] = Relationship(back_populates="departement", link_model=DocTypeDept, sa_relationship_kwargs={"lazy": "select"})
+    worker: "Worker" = Relationship(back_populates="departement", sa_relationship_kwargs={"lazy": "select"})
+
     @property
     def jumlah_doc_type(self) -> int | None:
         return len(self.doc_types)

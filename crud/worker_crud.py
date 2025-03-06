@@ -1,9 +1,9 @@
 from fastapi_async_sqlalchemy import db
 from sqlmodel import and_, select
 from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlalchemy.orm import selectinload, joinedload
 from crud.base_crud import CRUDBase
-from models import Worker, WorkerColumn
-from schemas.worker_column_sch import WorkerColumnSch
+from models import Worker, WorkerRole
 from schemas.worker_sch import WorkerCreateSch, WorkerUpdateSch
 from itertools import product
 import crud
@@ -13,6 +13,7 @@ class CRUDWorker(CRUDBase[Worker, WorkerCreateSch, WorkerUpdateSch]):
 
         query = select(Worker)
         query = query.where(Worker.id == id)
+        query = query.options(selectinload(Worker.roles))
         response = await db.session.execute(query)
         return response.scalar_one_or_none()
     
@@ -20,18 +21,17 @@ class CRUDWorker(CRUDBase[Worker, WorkerCreateSch, WorkerUpdateSch]):
         db_session = db_session or db.session
 
         worker = Worker.model_validate(sch.model_dump())
+        db_session.add(worker)
 
         await db_session.flush()
 
         for role in sch.roles:
-            for project in sch.projects:
-                mapping = WorkerColumnSch(worker_id=worker.id, departement_id=sch.departement_id, role_id=role.id, project_id=project.id)
-                db_session.add(mapping)
+            mapping = WorkerRole(worker_id=worker.id, role_id=role.id)
+            db_session.add(mapping)
 
         if created_by:
             worker.created_by = worker.updated_by = created_by
 
-        db_session.add(worker)
         await db_session.commit()
 
         return worker

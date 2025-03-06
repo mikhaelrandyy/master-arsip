@@ -18,9 +18,8 @@ async def get_list(search:str | None = None, params: Params=Depends()):
     if search:
         query = query.filter(
                 or_(
-                    cast(Worker.code, String).ilike(f'%{search}%'),
-                    cast(Worker.name, String).ilike(f'%{search}%'),
-                    cast(Worker.classification, String).ilike(f'%{search}%')
+                    cast(Worker.client_id, String).ilike(f'%{search}%'),
+                    cast(Worker.status, String).ilike(f'%{search}%')
                 )
             )
 
@@ -54,8 +53,8 @@ async def create(request: Request, sch: WorkerCreateSch):
     if hasattr(request.state, 'login_user'):
         login_user=request.state.login_user
     obj = await crud.worker.create(sch=sch, created_by=login_user.client_id)
-
-    return create_response(data=obj)
+    worker = await crud.worker.get_by_id(id=obj.id)
+    return create_response(data=worker)
 
 @router.put("/{id}", response_model=PostResponseBaseSch[WorkerByIdSch], status_code=status.HTTP_201_CREATED)
 async def update(id: str, request: Request, obj_new: WorkerUpdateSch):

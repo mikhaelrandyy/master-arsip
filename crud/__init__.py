@@ -1,6 +1,6 @@
 from .doc_type_crud import doc_type
 from .doc_format_crud import doc_format
-from .doc_type_group import doc_type_group
+from .doc_type_group_crud import doc_type_group
 from .doc_type_archive_crud import doc_type_archive
 from .column_type_crud import column_type
 from .alashak_crud import alashak
@@ -8,7 +8,7 @@ from .departement_crud import departement
 from .doc_type_column_type_crud import doc_type_column_type
 from .doc_archive_crud import doc_archive
 from .code_counter_crud import code_counter
-from .doc_type_departement_crud import doc_type_departement
+from .doc_type_dept_crud import doc_type_dept
 from .worker_crud import worker
 from .role_crud import role
 from .project_crud import project

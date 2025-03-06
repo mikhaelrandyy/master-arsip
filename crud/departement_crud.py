@@ -3,9 +3,10 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlmodel import and_, select
 from crud.base_crud import CRUDBase
-from models import Departement, DocTypeDepartement
-from schemas.departement_sch import DepartementCreateSch, DepartementUpdateSch, DepartementCreateForMappingSch
-from schemas.doc_type_departement_sch import DocTypeDepartementCreateSch
+from models import Departement, DocTypeDept
+from schemas.departement_sch import DepartementCreateSch, DepartementUpdateSch, DepartementCreateForMappingSch, DepartementSch
+from schemas.doc_type_dept_sch import DocTypeDeptCreateSch
+import crud
 
 class CRUDDepartement(CRUDBase[Departement, DepartementCreateSch, DepartementUpdateSch]):
    async def get_by_id(self, *, id:str) -> Departement:
@@ -16,24 +17,21 @@ class CRUDDepartement(CRUDBase[Departement, DepartementCreateSch, DepartementUpd
         response = await db.session.execute(query)
         return response.scalar_one_or_none()
    
-   async def create_departement_mapping(self, *, sch:DepartementCreateForMappingSch, created_by:str, db_session: AsyncSession | None = None) -> Departement:
+   async def create_dept_mapping(self, *, sch:DepartementCreateForMappingSch, db_session: AsyncSession | None = None) -> DepartementSch:
       db_session = db_session or db.session
 
-      departement = Departement.model_validate(sch)
+      jumlah_doc_type = len(sch.doc_types)
 
-      if created_by:
-         departement.created_by = departement.updated_by = created_by
-
-      await db_session.flush()
-      db_session.add(departement)
-         
-      for dt in sch.doc_types:
-         mapping_obj = DocTypeDepartementCreateSch(doc_type_id=dt.id, departement_id=departement.id)
-         obj_mapping_db = DocTypeDepartement.model_validate(mapping_obj.model_dump())
-         db_session.add(obj_mapping_db)
+      obj_dept = await crud.departement.get_by_id(id=sch.id)
       
-      await db_session.commit()
+      for dt in sch.doc_types:
+         mapping_obj = DocTypeDept(doc_type_id=dt.id, dept_id=sch.id)
+         db_session.add(mapping_obj)
+      
+      response_obj = DepartementSch(code=obj_dept.code, name=obj_dept.name, jumlah_doc_type=jumlah_doc_type)
 
-      return departement
+      # await db_session.commit()
+
+      return response_obj
      
 departement = CRUDDepartement(Departement)

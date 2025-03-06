@@ -5,14 +5,12 @@ from schemas.project_sch import ProjectCreateForMappingSch
 class WorkerCreateSch(WorkerBase):
     departement_id: str | None
     roles: list[RoleCreateForMappingSch] | None
-    projects: list[ProjectCreateForMappingSch] | None
  
 class WorkerSch(WorkerFullBase):
-    roles: list[RoleCreateForMappingSch] | None
-    projects: list[ProjectCreateForMappingSch] | None
+    departement_name: str | None
 
 class WorkerUpdateSch(WorkerBase):
     pass
 
 class WorkerByIdSch(WorkerFullBase):
-    pass
+    roles: list[RoleCreateForMappingSch] | None

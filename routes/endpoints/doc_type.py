@@ -85,8 +85,6 @@ async def mapping_doctype_jeniskolom(request: Request, sch: DocTypeColumnCreateU
     doc_type = await crud.doc_type.get_by_id(id=obj)
     return create_response(data=doc_type)
 
-
-
 @router.get("/mapping/column-type", response_model=GetResponsePaginatedSch[DocTypeSch])
 async def get_list_colum_type(search: str | None = None, params: Params=Depends()):
 
