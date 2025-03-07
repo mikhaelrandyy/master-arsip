@@ -105,25 +105,18 @@ class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
         return await paginate(db_session, query, params)
 
     def base_query(self):
-        query = select(DocType).outerjoin(DocTypeGroup, DocTypeGroup.id == DocType.doc_type_group_id
-                            ).outerjoin(DepartementDocType, DepartementDocType.doc_type_id == DocType.id
-                            ).outerjoin(Worker, Worker.departement_id == DepartementDocType.dept_id)
+
+        query = select(DocType)
+        query = query.outerjoin(DocTypeGroup, DocTypeGroup.id == DocType.doc_type_group_id
+                    ).join(DepartementDocType, DepartementDocType.doc_type_id == DocType.id
+                    ).join(Worker, Worker.dept_id == DepartementDocType.dept_id)
 
         return query
 
     def create_filter(self, query, filter:dict, login_info):
 
-        authorities = login_info.authorities
-        search = filter.get("search")
-        order_by = filter.get("order_by") 
-
-        if "superadmin" in authorities:
-            return query
-        
-        if login_info:
-            query = query.filter(Worker.client_id == login_info.client_id)
-
-        if search:
+        if filter.get("search"):
+            search = filter.get("search")
             query = query.filter(
                     or_(
                         cast(DocType.code, String).ilike(f'%{search}%'),
@@ -132,8 +125,12 @@ class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
                     )
                 )
             
-        if order_by:
-            query = query.order_by(order_by)
+        if filter.get("order_by"):
+            order_column = getattr(DocType, filter.get('order_by'))
+            query = query.order_by(order_column.desc())
+
+        if login_info and 'superadmin' not in login_info.authorities:
+            query = query.filter(Worker.client_id == login_info.client_id)
         
         return query
 
