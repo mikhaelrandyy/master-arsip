@@ -13,5 +13,5 @@ class RoleFullBase(BaseULIDModel, RoleBase):
     pass
 
 class Role(RoleFullBase, table=True):
-    workers: list["Worker"] = Relationship(link_model=WorkerRole, sa_relationship_kwargs={"lazy": "select"})
+    pass
     

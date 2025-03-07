@@ -20,7 +20,7 @@ class ColumnTypeFullBase(BaseULIDModel, ColumnTypeBase):
     pass
 
 class ColumnType(ColumnTypeFullBase, table=True):
-    doc_archives: list["DocArchive"] = Relationship(link_model=DocArchiveColumn, sa_relationship_kwargs={"lazy": "select"})
+    pass
 
 
     

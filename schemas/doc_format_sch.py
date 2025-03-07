@@ -7,7 +7,6 @@ class DocFormatCreateSch(DocFormatBase):
 
 class DocFormatSch(DocFormatFullBase):
     pass
-    # jenis_arsip:str | None
 
 class DocFormatUpdateSch(DocFormatBase):
     pass

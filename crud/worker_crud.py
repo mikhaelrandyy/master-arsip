@@ -13,7 +13,14 @@ class CRUDWorker(CRUDBase[Worker, WorkerCreateSch, WorkerUpdateSch]):
 
         query = select(Worker)
         query = query.where(Worker.id == id)
-        query = query.options(selectinload(Worker.roles))
+        query = query.options(selectinload(Worker.roles), selectinload(Worker.departement))
+        response = await db.session.execute(query)
+        return response.scalar_one_or_none()
+    
+    async def get_by_client_id(self, *, client_id:str) -> Worker:
+
+        query = select(Worker)
+        query = query.where(Worker.client_id == client_id)
         response = await db.session.execute(query)
         return response.scalar_one_or_none()
     

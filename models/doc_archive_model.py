@@ -14,6 +14,6 @@ class DocArchiveFullBase(BaseULIDModel, DocArchiveBase):
     pass
 
 class DocArchive(DocArchiveFullBase, table=True):
-    column_types: list["ColumnType"] = Relationship(back_populates="doc_archives", link_model=DocArchiveColumn, sa_relationship_kwargs={"lazy": "select"})
+    column_types: list["ColumnType"] = Relationship(link_model=DocArchiveColumn, sa_relationship_kwargs={"lazy": "select"})
     
     

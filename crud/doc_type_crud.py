@@ -1,19 +1,22 @@
 from fastapi import HTTPException
 from fastapi_async_sqlalchemy import db
-from sqlmodel import and_, select
+from fastapi_pagination.ext.sqlalchemy import paginate
+from fastapi_pagination import Params, Page
+from sqlmodel import and_, select, cast, String, or_
 from sqlalchemy.orm import selectinload, joinedload
 from sqlmodel.ext.asyncio.session import AsyncSession
 from fastapi.encoders import jsonable_encoder
 from crud.base_crud import CRUDBase
-from models import DocType, DocTypeArchive, DocFormat
+from models import DocType, DocTypeArchive, DocTypeGroup, DepartementDocType, Worker
 from schemas.doc_type_sch import DocTypeCreateSch, DocTypeUpdateSch
 from schemas.doc_type_archive_sch import DocTypeArchiveCreateSch
 from common.generator import generate_code
 from common.enum import CodeCounterEnum
 import crud
-
+import json
 
 class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
+
     async def get_by_id(self, *, id:str) -> DocType:
 
         query = select(DocType)
@@ -92,5 +95,47 @@ class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
 
         return obj_current
 
-     
+    async def get_paginated(self, params, login_info, db_session: AsyncSession | None = None, **kwargs):
+        db_session = db_session or db.session
+
+        query = self.base_query()
+
+        query = self.create_filter(query=query, filter=kwargs, login_info=login_info)
+
+        return await paginate(db_session, query, params)
+
+    def base_query(self):
+        query = select(DocType).outerjoin(DocTypeGroup, DocTypeGroup.id == DocType.doc_type_group_id
+                            ).outerjoin(DepartementDocType, DepartementDocType.doc_type_id == DocType.id
+                            ).outerjoin(Worker, Worker.departement_id == DepartementDocType.dept_id)
+
+        return query
+
+    def create_filter(self, query, filter:dict, login_info):
+
+        authorities = login_info.authorities
+        search = filter.get("search")
+        order_by = filter.get("order_by") 
+
+        if "superadmin" in authorities:
+            return query
+        
+        if login_info:
+            query = query.filter(Worker.client_id == login_info.client_id)
+
+        if search:
+            query = query.filter(
+                    or_(
+                        cast(DocType.code, String).ilike(f'%{search}%'),
+                        cast(DocType.name, String).ilike(f'%{search}%'),
+                        cast(DocTypeGroup.name, String).ilike(f'%{search}%')
+                    )
+                )
+            
+        if order_by:
+            query = query.order_by(order_by)
+        
+        return query
+
+
 doc_type = CRUDDocType(DocType)

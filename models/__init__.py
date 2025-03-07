@@ -8,8 +8,8 @@ from .doc_archive_column_model import DocArchiveColumn
 from .column_type_model  import ColumnType
 from .alashak_model import Alashak
 from .departement_model import Departement
+from .departement_doc_type_model import DepartementDocType
 from .code_counter_model import CodeCounter
-from .doc_type_dept_model import DocTypeDept
 from .role_model import Role
 from .worker_model import Worker
 from .project_model import Project

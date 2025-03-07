@@ -12,21 +12,12 @@ from utils.exceptions.common_exception import IdNotFoundException
 router = APIRouter()
 
 @router.get("", response_model=GetResponsePaginatedSch[DocTypeSch])
-async def get_list(search: str | None = None, params: Params=Depends()):
+async def get_list(request: Request, search: str | None = None, order_by: str | None = None, params: Params=Depends()):
 
-    query = select(DocType).outerjoin(DocTypeGroup, DocTypeGroup.id == DocType.doc_type_group_id)
+    if hasattr(request.state, 'login_user'):
+        login_user = request.state.login_user
 
-    if search:
-        query = query.filter(
-                or_(
-                    cast(DocType.code, String).ilike(f'%{search}%'),
-                    cast(DocType.name, String).ilike(f'%{search}%'),
-                    cast(DocTypeGroup.name, String).ilike(f'%{search}%')
-                )
-            )
-
-    objs = await crud.doc_type.get_multi_paginated_ordered(query=query, params=params)
-
+    objs = await crud.doc_type.get_paginated(search=search, order_by=order_by, params=params, login_info=login_user)
     return create_response(data=objs)
 
 @router.get("/no-page", response_model=GetResponseBaseSch[list[DocTypeSch]])

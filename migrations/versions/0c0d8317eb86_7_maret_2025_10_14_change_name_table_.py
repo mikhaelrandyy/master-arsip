@@ -1,8 +1,8 @@
-"""6 Maret 2025 16:00 add table project
+"""7 Maret 2025 10:14 change name table departement doc type
 
-Revision ID: ceab6474cf95
+Revision ID: 0c0d8317eb86
 Revises: 82d05d6a0f88
-Create Date: 2025-03-06 16:06:04.883254
+Create Date: 2025-03-07 10:20:12.103191
 
 """
 from typing import Sequence, Union
@@ -11,9 +11,8 @@ from alembic import op
 import sqlalchemy as sa
 import sqlmodel
 
-
 # revision identifiers, used by Alembic.
-revision: str = 'ceab6474cf95'
+revision: str = '0c0d8317eb86'
 down_revision: Union[str, None] = '82d05d6a0f88'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -57,7 +56,7 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_worker_id'), 'worker', ['id'], unique=False)
-    op.create_table('doc_type_dept',
+    op.create_table('departement_doc_type',
     sa.Column('doc_type_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('dept_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.ForeignKeyConstraint(['dept_id'], ['departement.id'], ),
@@ -85,7 +84,7 @@ def downgrade() -> None:
     sa.PrimaryKeyConstraint('doc_type_id', 'departement_id', name='doc_type_departement_pkey')
     )
     op.drop_table('worker_role')
-    op.drop_table('doc_type_dept')
+    op.drop_table('departement_doc_type')
     op.drop_index(op.f('ix_worker_id'), table_name='worker')
     op.drop_table('worker')
     op.drop_index(op.f('ix_role_id'), table_name='role')

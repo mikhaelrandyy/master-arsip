@@ -3,7 +3,7 @@ from sqlmodel import SQLModel, Field, Relationship
 from typing import TYPE_CHECKING
 from models.doc_type_archive_model import DocTypeArchive
 from models.doc_type_column_model import DocTypeColumn
-from models.doc_type_dept_model import DocTypeDept
+from models.departement_doc_type_model import DepartementDocType
 
 if TYPE_CHECKING:
     from models import DocTypeGroup, DocFormat, Alashak, ColumnType, Departement
@@ -21,7 +21,7 @@ class DocTypeFullBase(BaseULIDModel, DocTypeBase):
     pass
 
 class DocType(DocTypeFullBase, table=True):
-    departement: "Departement" = Relationship(back_populates="doc_types", link_model=DocTypeDept, sa_relationship_kwargs = {"lazy": "select"})
+    departement: "Departement" = Relationship(back_populates="doc_types", link_model=DepartementDocType, sa_relationship_kwargs = {"lazy": "select"})
     alashak: "Alashak" = Relationship(sa_relationship_kwargs = {"lazy": "select"})
     doc_type_group: "DocTypeGroup" = Relationship(back_populates="doc_types", sa_relationship_kwargs = {"lazy": "select"})
     doc_formats: list["DocFormat"] = Relationship(link_model=DocTypeArchive, sa_relationship_kwargs = {"lazy": "select", "viewonly":True})
