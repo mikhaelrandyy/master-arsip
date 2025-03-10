@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from models import DocType
 
 class DocFormatBase(SQLModel):
-    code: str | None = Field(nullable=True, unique=True)
+    code: str | None = Field(nullable=False, default=None, unique=True)
     name: str | None = Field(nullable=True)
     classification: DocumentClassificationEnum | None = Field(nullable=True)
 

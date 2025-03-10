@@ -6,11 +6,11 @@ if TYPE_CHECKING:
     from models import DocType
 
 class DocTypeGroupBase(SQLModel):
-    code: str | None = Field(nullable=True, unique=True)
-    name: str | None = Field(nullable=True)
+    code: str | None = Field(nullable=False, default=None, unique=True)
+    name: str | None = Field(nullable=False)
 
 class DocTypeGroupFullBase(BaseULIDModel, DocTypeGroupBase):
     pass
 
 class DocTypeGroup(DocTypeGroupFullBase, table=True):
-    doc_types: list["DocType"] = Relationship(sa_relationship_kwargs = {"lazy": "select"})
+    pass

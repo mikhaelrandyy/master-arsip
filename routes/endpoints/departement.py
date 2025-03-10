@@ -2,7 +2,8 @@ from fastapi import APIRouter, status, HTTPException, Request, Depends
 from sqlmodel import select, or_
 from sqlalchemy.orm import selectinload
 from fastapi_pagination import Params
-from schemas.departement_sch import (DepartementSch, DepartementUpdateSch, DepartementCreateSch, DepartementByIdSch, DepartementCreateForMappingSch)
+from schemas.oauth import AccessToken
+from schemas.departement_sch import (DepartementSch, DepartementUpdateSch, DepartementCreateSch, DepartementByIdSch)
 from schemas.response_sch import (PostResponseBaseSch, GetResponseBaseSch, GetResponsePaginatedSch, create_response)
 from models.departement_model import Departement
 import crud
@@ -11,20 +12,24 @@ from utils.exceptions.common_exception import IdNotFoundException
 router = APIRouter()
 
 @router.get("", response_model=GetResponsePaginatedSch[DepartementSch])
-async def get_list(params: Params=Depends()):
-
-    query = select(Departement)
-
-    objs = await crud.departement.get_multi_paginated_ordered(query=query, params=params)
-
+async def get_list(
+    request: Request,
+    params: Params=Depends(),
+    search: str | None = None,
+    order_by: str | None = None
+):
+    login_user: AccessToken = request.state.login_user
+    objs = await crud.departement.get_paginated(params=params, login_user=login_user, search=search, order_by=order_by)
     return create_response(data=objs)
 
 @router.get("/no-page", response_model=GetResponseBaseSch[list[DepartementSch]])
-async def get_no_page():
-
-    query = select(Departement)
-
-    objs = await crud.departement.get_all_ordered(query=query, order_by="created_at")
+async def get_no_page(
+    request: Request,
+    search: str | None = None,
+    order_by: str | None = None
+):
+    login_user: AccessToken = request.state.login_user
+    objs = await crud.departement.get_no_page(login_user=login_user, search=search, order_by=order_by)
 
     return create_response(data=objs)
 
@@ -42,36 +47,37 @@ async def get_by_id(id: str):
 async def create(request: Request, sch: DepartementCreateSch):
     
     """Create a new object"""
-    if hasattr(request.state, 'login_user'):
-        login_user=request.state.login_user
+    login_user: AccessToken = request.state.login_user
     obj = await crud.departement.create(obj_in=sch, created_by=login_user.client_id)
-    return create_response(data=obj)
+    response_obj = await crud.departement.get_by_id(id=obj.id)
+    return create_response(data=response_obj)
 
-@router.put("/{id}", response_model=PostResponseBaseSch[DepartementByIdSch], status_code=status.HTTP_201_CREATED)
+@router.put("/{id}", response_model=PostResponseBaseSch[DepartementSch], status_code=status.HTTP_201_CREATED)
 async def update(id: str, request: Request, obj_new: DepartementUpdateSch):
     
-    if hasattr(request.state, 'login_user'):
-        login_user = request.state.login_user
-
+    login_user:AccessToken = request.state.login_user
     obj_current = await crud.departement.get(id=id)
 
     if not obj_current:
-        raise HTTPException(status_code=404, detail=f"Data tidak tersedia")
+        raise IdNotFoundException(Departement, id)
 
     obj_updated = await crud.departement.update(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
-
     response_obj = await crud.departement.get_by_id(id=obj_updated.id)
     return create_response(data=response_obj)
 
-
-@router.post("/mapping/doc-type", response_model=PostResponseBaseSch[DepartementSch], status_code=status.HTTP_201_CREATED)
-async def create_mapping(request: Request, sch: DepartementCreateForMappingSch):
+@router.post("/mapping/doc-type/{id}", response_model=PostResponseBaseSch[DepartementSch], status_code=status.HTTP_201_CREATED)
+async def mapping_departement_doc_type(id:str, doc_type_ids: list[str]):
     
-    """Create a new object"""
-    
-    obj = await crud.departement.create_dept_mapping(sch=sch)
+    """Create a new mapping with doc type"""
 
-    return create_response(data=obj)
+    obj_current = await crud.departement.get(id=id)
+    if not obj_current:
+        raise IdNotFoundException(Departement, id)
+    
+    await crud.departement.update_and_mapping_w_doc_type(obj_current=obj_current, doc_type_ids=doc_type_ids)
+    response_obj = await crud.departement.get_by_id(id=obj_current.id)
+
+    return create_response(data=response_obj)
 
 
 

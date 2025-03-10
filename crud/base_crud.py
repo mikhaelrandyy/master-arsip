@@ -90,7 +90,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         *,
         params: Params | None = Params(),
         order_by: str | None = "updated_at",
-        order: OrderEnumSch | None = OrderEnumSch.ascendent,
+        order: OrderEnumSch | None = OrderEnumSch.descendent,
         query: T | Select[T] | None = None,
         db_session: AsyncSession | None = None,
     ) -> Page[ModelType]:
@@ -180,8 +180,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         self,
         *,
         query: T | Select[T] | None = None,
-        order_by: str | None = None,
-        order: OrderEnumSch | None = OrderEnumSch.ascendent,
+        order_by: str | None = "updated_at",
+        order: OrderEnumSch | None = OrderEnumSch.descendent,
         db_session: AsyncSession | None = None,
     ) -> list[ModelType]:
         db_session = db_session or db.session

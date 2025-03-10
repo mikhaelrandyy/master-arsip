@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 
 class DepartementDocTypeBase(SQLModel):
     doc_type_id: str = Field(nullable=False, foreign_key='doc_type.id', primary_key=True)
-    dept_id: str = Field(nullable=False, foreign_key='departement.id', primary_key=True)
+    departement_id: str = Field(nullable=False, foreign_key='departement.id', primary_key=True)
     
 class DepartementDocType(DepartementDocTypeBase, table=True):
     pass

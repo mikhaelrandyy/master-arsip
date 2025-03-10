@@ -19,7 +19,7 @@ class CRUDColumnType(CRUDBase[ColumnType, ColumnTypeCreateSch, ColumnTypeUpdateS
     async def create(self, *, sch:ColumnTypeCreateSch, created_by:str, db_session: AsyncSession | None = None) -> ColumnType:
         db_session = db_session or db.session
 
-        if sch.tipe_data == TipeDataEnum.ENUM:
+        if sch.data_type == TipeDataEnum.ENUM:
             if sch.enum_data is None:
                 raise HTTPException(status_code=400, detail="Enum data is required for Tipe Data Enum")
 

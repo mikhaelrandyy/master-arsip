@@ -1,4 +1,4 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 from fastapi_async_sqlalchemy import db
 from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_pagination import Params, Page
@@ -8,8 +8,10 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from fastapi.encoders import jsonable_encoder
 from crud.base_crud import CRUDBase
 from models import DocType, DocTypeArchive, DocTypeGroup, DepartementDocType, Worker, DocTypeColumn
-from schemas.doc_type_sch import DocTypeCreateSch, DocTypeUpdateSch
-from schemas.doc_type_archive_sch import DocTypeArchiveCreateSch
+from schemas.oauth import AccessToken
+from schemas.doc_type_sch import DocTypeCreateSch, DocTypeUpdateSch, DocTypeSch, DocTypeByIdSch
+from schemas.doc_type_archive_sch import DocTypeArchiveCreateSch, DocTypeArchiveSch
+from schemas.doc_type_column_sch import DocTypeColumnSch
 from common.generator import generate_code
 from common.enum import CodeCounterEnum
 import crud
@@ -17,22 +19,12 @@ import json
 
 class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
 
-    async def get_by_id(self, *, id:str) -> DocType:
-
-        query = select(DocType)
-        query = query.where(DocType.id == id)
-        query = query.options(selectinload(DocType.doc_type_group)
-                    ).options(selectinload(DocType.column_types)
-                    ).options(selectinload(DocType.doc_formats))
-        response = await db.session.execute(query)
-        return response.scalar_one_or_none()
-    
-    async def create_and_mapping(self, *, sch:DocTypeCreateSch, created_by:str, db_session: AsyncSession | None = None) -> DocType:
+    async def create_and_mapping_w_doc_format(self, *, sch:DocTypeCreateSch, created_by:str, db_session: AsyncSession | None = None) -> DocType:
         db_session = db_session or db.session
 
         sch.code = await generate_code(entity=CodeCounterEnum.DOC_TYPE, db_session=db_session)
 
-        db_obj = DocType.model_validate(sch)
+        db_obj = DocType(**sch.model_dump())
 
         if created_by:
             db_obj.created_by = db_obj.updated_by = created_by
@@ -42,14 +34,14 @@ class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
         await db_session.refresh(db_obj)
 
         for obj in sch.doc_archives:
-            db_obj_mapping = DocTypeArchive(doc_format_id=obj.id, doc_type_id=db_obj.id, jenis_arsip=obj.jenis_arsip)
+            db_obj_mapping = DocTypeArchive(doc_format_id=obj.doc_format_id, doc_type_id=db_obj.id, jenis_arsip=obj.jenis_arsip)
             db_session.add(db_obj_mapping)
             
         await db_session.commit()
 
         return db_obj
 
-    async def update_doc_type_and_mapping(self, *, obj_current:DocType, obj_new:DocTypeUpdateSch, updated_by:str, db_session: AsyncSession | None = None) -> DocType:
+    async def update_and_mapping_w_doc_format(self, *, obj_current:DocType, obj_new:DocTypeUpdateSch, updated_by:str, db_session: AsyncSession | None = None) -> DocType:
         db_session = db_session or db.session
 
         obj_data = jsonable_encoder(obj_current)
@@ -64,7 +56,7 @@ class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
         db_session.add(obj_current)
         await db_session.flush()
 
-        current_doc_type_archives = await crud.doc_type_archive.get_by_doc_type_id(doc_type_id=obj_current.id)
+        current_doc_type_archives = await crud.doc_type_archive.get_by_doc_type(doc_type_id=obj_current.id)
 
         for dt in obj_new.doc_archives:
             current_doc_type_archive = await crud.doc_type_archive.get_doc_type_archive(doc_type_id=obj_current.id, doc_format_id=dt.id, jenis_arsip=dt.jenis_arsip)
@@ -87,17 +79,54 @@ class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
 
         return obj_current
 
-    async def get_paginated(self, params, login_user, db_session: AsyncSession | None = None, **kwargs):
-        db_session = db_session or db.session
+    async def update_and_mapping_w_column_type(self, *, obj_current: DocType, column_type_ids: list[str]):
+        
+        current_doc_type_columns = await crud.doc_type_column.get_by_doc_type(doc_type_id=obj_current.id)
+        
+        for column_type_id in column_type_ids:
+            doc_type_column = await crud.doc_type_column.get_doc_type_column(doc_type_id=obj_current.id, column_type_id=column_type_id)
+            if not doc_type_column:
+                column_type = await crud.column_type.get(id=column_type_id)
+                if not column_type:
+                    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Selected column not found!")
+                
+                db_obj = DocTypeColumn(doc_type_id=obj_current.id, column_type_id=column_type_id)
+                db.session.add(db_obj)
+                await db.session.flush()
+            else:
+                current_doc_type_columns.remove(doc_type_column)
+        
+        for current_doc_type_column in current_doc_type_columns:
+            await db.session.delete(current_doc_type_column)
 
+        await db.session.commit()
+
+    async def get_paginated(self, *, params: Params | None = Params(), login_user: AccessToken | None = None, **kwargs):
         query = self.base_query()
         query = self.create_filter(query=query, filter=kwargs, login_user=login_user)
 
-        return await paginate(db_session, query, params)
+        return await paginate(db.session, query, params)
+
+    async def get_no_page(self, *, login_user, **kwargs):
+        query = self.base_query()
+        query = self.create_filter(query=query, filter=kwargs, login_user=login_user)
+        response = await db.session.execute(query)
+
+        return response.mappings().all()
+
+    async def get_by_id(self, *, id:str):
+        doc_type = await self.fetch_doc_type(id=id)
+        if not doc_type: return None
+        
+        doc_type = DocTypeByIdSch(**doc_type._mapping)
+        doc_type.doc_archives = await self.fetch_doc_type_archives(doc_type_id=id)
+        doc_type.doc_columns = await self.fetch_doc_type_columns(doc_type_id=id)
+
+        return doc_type
 
     def base_query(self):
 
-        columns_sq = (
+        count_columns_sq = (
             select(func.count(DocType.id).label("jmlh"), DocType.id
                 ).join(DocTypeColumn, DocTypeColumn.doc_type_id == DocType.id
                 ).group_by(DocType.id).cte("number_of_columns_cte")
@@ -106,18 +135,20 @@ class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
         query = select(
                     *DocType.__table__.columns,
                     DocTypeGroup.name.label('doc_type_group_name'),
-                    columns_sq.c.jmlh.label('number_of_columns')
+                    count_columns_sq.c.jmlh.label('number_of_columns')
                 )
 
         query = query.outerjoin(DocTypeGroup, DocTypeGroup.id == DocType.doc_type_group_id
-                    ).outerjoin(columns_sq, columns_sq.c.id == DocType.id)
+                    ).outerjoin(count_columns_sq, count_columns_sq.c.id == DocType.id)
                     
         query = query.outerjoin(DepartementDocType, DepartementDocType.doc_type_id == DocType.id
-                    ).outerjoin(Worker, Worker.departement_id == DepartementDocType.dept_id)
+                    ).outerjoin(Worker, Worker.departement_id == DepartementDocType.departement_id)
+        
+        query = query.distinct()
 
         return query
 
-    def create_filter(self, query, filter:dict, login_user):
+    def create_filter(self, *, query, filter:dict, login_user:AccessToken | None = None):
 
         if filter.get("search"):
             search = filter.get("search")
@@ -138,5 +169,33 @@ class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
         
         return query
 
+    async def fetch_doc_type(self, id:str):
+        query = self.base_query()
+        query = query.where(DocType.id == id)
+
+        response = await db.session.execute(query)
+        return response.one_or_none()
+    
+    async def fetch_doc_type_archives(self, doc_type_id:str):
+        doc_type_archives = await crud.doc_type_archive.fetch_doc_format_by_doc_type(doc_type_id=doc_type_id)
+        if not doc_type_archives: return []
+        
+        document_type_archives = []
+        for doc_type_archive in doc_type_archives:
+            doc_type_arvh = DocTypeArchiveSch(**doc_type_archive)
+            document_type_archives.append(doc_type_arvh)
+
+        return document_type_archives
+
+    async def fetch_doc_type_columns(self, doc_type_id:str):
+        doc_type_columns = await crud.doc_type_column.fetch_column_by_doc_type(doc_type_id=doc_type_id)
+        if not doc_type_columns: return []
+
+        document_type_columns = []
+        for doc_type_column in doc_type_columns:
+            doc_type_col = DocTypeColumnSch(**doc_type_column)
+            document_type_columns.append(doc_type_col)
+
+        return document_type_columns
 
 doc_type = CRUDDocType(DocType)

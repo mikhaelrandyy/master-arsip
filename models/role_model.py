@@ -7,7 +7,7 @@ if  TYPE_CHECKING:
     from models import Worker
 
 class RoleBase(SQLModel):
-    name: str = Field(nullable=True)
+    name: str = Field(nullable=False)
 
 class RoleFullBase(BaseULIDModel, RoleBase):
     pass

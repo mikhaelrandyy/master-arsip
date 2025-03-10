@@ -7,14 +7,14 @@ if TYPE_CHECKING:
     from models import DocType, Worker
 
 class DepartementBase(SQLModel):
-    code: str | None = Field(nullable=True, unique=True)
+    code: str | None = Field(nullable=False, default=None, unique=True)
     name: str | None = Field(nullable=True)
 
 class DepartementFullBase(BaseULIDModel, DepartementBase):
     pass
 
 class Departement(DepartementFullBase, table=True):
-    doc_types: list["DocType"] = Relationship(back_populates="departement", link_model=DepartementDocType, sa_relationship_kwargs={"lazy": "select"})
+    doc_types: list["DocType"] = Relationship(link_model=DepartementDocType, sa_relationship_kwargs={"lazy": "select"})
     
     @property
     def jumlah_doc_type(self) -> int | None:

@@ -6,7 +6,7 @@ class DocTypeColumnCreateSch(DocTypeColumnBase):
     pass
 
 class DocTypeColumnSch(DocTypeColumnBase):
-    pass
+    column_name: str | None = None
 
 class DocTypeColumnUpdateSch(DocTypeColumnBase):
     pass

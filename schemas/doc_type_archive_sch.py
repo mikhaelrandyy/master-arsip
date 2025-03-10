@@ -6,10 +6,10 @@ class DocTypeArchiveCreateSch(DocTypeArchiveBase):
     pass
 
 class DocTypeArchiveSch(DocTypeArchiveBase):
-    pass 
+    doc_format_name: str | None = None
 
 class DocTypeArchiveUpdateSch(DocTypeArchiveBase):
-    pass
+    id: str | None = None
 
 class DocTypeArchiveByIdSch(DocTypeArchiveBase):
     pass

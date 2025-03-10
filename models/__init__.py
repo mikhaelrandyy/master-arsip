@@ -1,10 +1,10 @@
 from .doc_format_model import DocFormat
 from .doc_type_group_model import DocTypeGroup
 from .doc_type_model import DocType
-from .doc_archive_model import DocArchive
+# from .doc_archive_model import DocArchive
 from .doc_type_archive_model import DocTypeArchive
 from .doc_type_column_model import DocTypeColumn
-from .doc_archive_column_model import DocArchiveColumn
+# from .doc_archive_column_model import DocArchiveColumn
 from .column_type_model  import ColumnType
 from .alashak_model import Alashak
 from .departement_model import Departement

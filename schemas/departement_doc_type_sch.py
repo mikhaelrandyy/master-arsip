@@ -4,7 +4,7 @@ class DepartementDocTypeCreateSch(DepartementDocTypeBase):
     pass
 
 class DepartementDocTypeSch(DepartementDocTypeBase):
-    pass
+    doc_type_name: str | None = None
 
 class DepartementDocTypeUpdateSch(DepartementDocTypeBase):
     pass

@@ -1,35 +1,33 @@
 from fastapi import APIRouter, status, HTTPException, Request, Depends
 from sqlmodel import select, or_, cast, String
 from fastapi_pagination import Params
+from schemas.oauth import AccessToken
 from schemas.response_sch import PostResponseBaseSch, GetResponseBaseSch, GetResponsePaginatedSch, create_response
-from schemas.doc_type_sch import (DocTypeSch, DocTypeUpdateSch, DocTypeCreateSch, DocTypeSchFullBaseSch)
+from schemas.doc_type_sch import (DocTypeSch, DocTypeUpdateSch, DocTypeCreateSch, DocTypeByIdSch)
 from schemas.doc_type_column_sch import DocTypeColumnCreateUpdateSch
 from models.doc_type_model import DocType
-from models import DocTypeGroup, DocArchiveColumn, DocArchive
+from models import DocTypeGroup
 import crud
 from utils.exceptions.common_exception import IdNotFoundException
 
 router = APIRouter()
 
-@router.get("", response_model=GetResponsePaginatedSch[DocTypeSchFullBaseSch])
+@router.get("", response_model=GetResponsePaginatedSch[DocTypeSch])
 async def get_list(request: Request, search: str | None = None, order_by: str | None = None, params: Params=Depends()):
 
-    if hasattr(request.state, 'login_user'):
-        login_user = request.state.login_user
-
+    login_user: AccessToken = request.state.login_user
     objs = await crud.doc_type.get_paginated(search=search, order_by=order_by, params=params, login_user=login_user)
     return create_response(data=objs)
 
-@router.get("/no-page", response_model=GetResponseBaseSch[list[DocTypeSchFullBaseSch]])
-async def get_no_page():
+@router.get("/no-page", response_model=GetResponseBaseSch[list[DocTypeSch]])
+async def get_no_page(request: Request, search: str | None = None, order_by: str | None = None,):
 
-    query = select(DocType)
-
-    objs = await crud.doc_type.get_all_ordered(query=query, order_by="created_at")
+    login_user : AccessToken = request.state.login_user
+    objs = await crud.doc_type.get_no_page(login_user=login_user, search=search, order_by=order_by)
 
     return create_response(data=objs)
 
-@router.get("/{id}", response_model=GetResponseBaseSch[DocTypeSch])
+@router.get("/{id}", response_model=GetResponseBaseSch[DocTypeByIdSch])
 async def get_by_id(id: str):
 
     obj = await crud.doc_type.get_by_id(id=id)
@@ -43,55 +41,39 @@ async def get_by_id(id: str):
 async def create(request: Request, sch: DocTypeCreateSch):
     
     """Create a new object"""
-    if hasattr(request.state, 'login_user'):
-        login_user=request.state.login_user
 
-    obj = await crud.doc_type.create_and_mapping(sch=sch, created_by=login_user.client_id)
+    login_user : AccessToken = request.state.login_user
+    obj = await crud.doc_type.create_and_mapping_w_doc_format(sch=sch, created_by=login_user.client_id)
+    response_obj = await crud.doc_type.get_by_id(id=obj.id)
 
-    doc_type = await crud.doc_type.get_by_id(id=obj.id)
+    return create_response(data=response_obj)
 
-    return create_response(data=doc_type)
-
-@router.put("/{id}", response_model=PostResponseBaseSch[DocTypeSchFullBaseSch], status_code=status.HTTP_201_CREATED)
-async def update(id: str, request: Request, obj_new: DocTypeUpdateSch):
+@router.put("/{id}", response_model=PostResponseBaseSch[DocTypeSch], status_code=status.HTTP_201_CREATED)
+async def update(request: Request, id: str, obj_new: DocTypeUpdateSch):
     
-    if hasattr(request.state, 'login_user'):
-        login_user = request.state.login_user
-
+    login_user : AccessToken = request.state.login_user
     obj_current = await crud.doc_type.get(id=id)
 
     if not obj_current:
         raise HTTPException(status_code=404, detail=f"Document Type tidak ditemukan")
 
-    obj_updated = await crud.doc_type.update_doc_type_and_mapping(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
+    obj_updated = await crud.doc_type.update_and_mapping_w_doc_format(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
     response_obj = await crud.doc_type.get_by_id(id=obj_updated.id)
     return create_response(data=response_obj)
 
-@router.put("/mapping/jenis-kolom", response_model=PostResponseBaseSch[DocTypeSch], status_code=status.HTTP_201_CREATED)
-async def mapping_doctype_jeniskolom(request: Request, sch: DocTypeColumnCreateUpdateSch):
+@router.post("/mapping/column_type/{id}", response_model=PostResponseBaseSch[DocTypeSch], status_code=status.HTTP_201_CREATED)
+async def mapping_doc_type_column(request: Request, id:str, column_type_ids: list[str]):
     
-    """Create a new object"""
+    """Create a new Mapping"""
 
-    obj = await crud.doc_type_column_type.mapping_doc_type_column_type(sch=sch)
-    doc_type = await crud.doc_type.get_by_id(id=obj)
-    return create_response(data=doc_type)
+    obj_current = await crud.doc_type.get(id=id)
+    if not obj_current:
+        raise IdNotFoundException(DocType, id=id)
 
-@router.get("/mapping/column-type", response_model=GetResponsePaginatedSch[DocTypeSch])
-async def get_list_colum_type(search: str | None = None, params: Params=Depends()):
+    await crud.doc_type.update_and_mapping_w_column_type(obj_current=obj_current, column_type_ids=column_type_ids)
 
-    query = select(DocArchiveColumn).outerjoin(DocArchive, DocArchive.id == DocArchiveColumn.doc_archive_id
-                                                  ).outerjoin(DocType, DocType.id == DocArchive.doc_type_id)
+    response_obj = await crud.doc_type.get_by_id(id=obj_current.id)
+    return create_response(data=response_obj)
 
-    if search:
-        query = query.filter(
-                or_(
-                    cast(DocType.name, String).ilike(f'%{search}%'),
-                    cast(DocType.jumlah_colum_type, String).ilike(f'%{search}%')
-                )
-            )
-
-    objs = await crud.doc_type.get_multi_paginated_ordered(query=query, params=params)
-
-    return create_response(data=objs)
 
 

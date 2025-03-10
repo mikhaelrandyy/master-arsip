@@ -23,7 +23,7 @@ async def get_list(search: str | None = None, params: Params=Depends()):
                 )
             )
 
-    objs = await crud.doc_type_group_crud.get_multi_paginated_ordered(query=query, params=params)
+    objs = await crud.doc_type_group.get_multi_paginated_ordered(query=query, params=params)
 
     return create_response(data=objs)
 
@@ -32,14 +32,14 @@ async def get_no_page():
 
     query = select(DocTypeGroup)
 
-    objs = await crud.doc_type_group_crud.get_all_ordered(query=query, order_by="created_at")
+    objs = await crud.doc_type_group.get_all_ordered(query=query, order_by="created_at")
 
     return create_response(data=objs)
 
 @router.get("/{id}", response_model=GetResponseBaseSch[DocTypeGroupByIdSch])
 async def get_by_id(id: str):
 
-    obj = await crud.doc_type_group_crud.get_by_id(id=id)
+    obj = await crud.doc_type_group.get_by_id(id=id)
 
     if obj is None:
         raise IdNotFoundException(DocTypeGroup, id)
@@ -52,7 +52,7 @@ async def create(request: Request, sch: DocTypeGroupCreateSch):
     """Create a new object"""
     if hasattr(request.state, 'login_user'):
         login_user=request.state.login_user
-    obj = await crud.doc_type_group_crud.create(sch=sch, created_by=login_user.client_id)
+    obj = await crud.doc_type_group.create(sch=sch, created_by=login_user.client_id)
 
     return create_response(data=obj)
 
@@ -62,13 +62,13 @@ async def update(id: str, request: Request, obj_new: DocTypeGroupUpdateSch):
     if hasattr(request.state, 'login_user'):
         login_user = request.state.login_user
 
-    obj_current = await crud.doc_type_group_crud.get(id=id)
+    obj_current = await crud.doc_type_group.get(id=id)
 
     if not obj_current:
         raise HTTPException(status_code=404, detail=f"Document Type Group tidak ditemukan")
 
-    obj_updated = await crud.doc_type_group_crud.update(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
-    response_obj = await crud.doc_type_group_crud.get_by_id(id=obj_updated.id)
+    obj_updated = await crud.doc_type_group.update(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
+    response_obj = await crud.doc_type_group.get_by_id(id=obj_updated.id)
     return create_response(data=response_obj)
 
 
