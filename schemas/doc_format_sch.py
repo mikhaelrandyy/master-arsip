@@ -10,10 +10,3 @@ class DocFormatSch(DocFormatFullBase):
 
 class DocFormatUpdateSch(DocFormatBase):
     pass
-
-class DocFormatByIdSch(DocFormatFullBase):
-    pass
-
-class DocFormatForDocTypeSch(SQLModel):
-    id: str | None
-    jenis_arsip:str | None

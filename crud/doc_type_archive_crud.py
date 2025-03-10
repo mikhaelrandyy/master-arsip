@@ -22,11 +22,15 @@ class CRUDDocFormatJenisArsipDocType(CRUDBase[DocTypeArchive, DocTypeArchiveCrea
         response = await db.session.execute(query)
         return response.scalars().all()
 
-    async def get_by_doc_format_id(self, *, doc_format_id:str, jenis_arsip:JenisArsipEnum) -> DocTypeArchive:
+    async def get_doc_type_archive(self, *, doc_type_id:str, doc_format_id:str, jenis_arsip:JenisArsipEnum) -> DocTypeArchive:
 
         query = select(DocTypeArchive)
-        query = query.where(and_(DocTypeArchive.doc_format_id == doc_format_id,
-                                DocTypeArchive.jenis_arsip == jenis_arsip))
+        query = query.where(and_(
+            DocTypeArchive.doc_type_id == doc_type_id,
+            DocTypeArchive.doc_format_id == doc_format_id,
+            DocTypeArchive.jenis_arsip == jenis_arsip
+            )
+        )
         response = await db.session.execute(query)
         return response.scalar_one_or_none()
     
