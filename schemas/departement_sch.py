@@ -1,6 +1,5 @@
 from models.departement_model import DepartementBase, DepartementFullBase
 from sqlmodel import SQLModel
-from schemas.doc_type_sch import DocTypeCreateForDepartementSch
 
 
 class DepartementCreateSch(DepartementBase):
@@ -13,10 +12,9 @@ class DepartementUpdateSch(DepartementBase):
     pass
 
 class DepartementByIdSch(DepartementFullBase):
-    doc_types: list[DocTypeCreateForDepartementSch] | None
+    pass
 
 class DepartementCreateForMappingSch(SQLModel):
     id: str | None
-    doc_types: list[DocTypeCreateForDepartementSch] | None
 
 

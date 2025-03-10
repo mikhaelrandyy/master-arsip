@@ -2,7 +2,7 @@ from fastapi import APIRouter, status, HTTPException, Request, Depends
 from sqlmodel import select, or_, String, cast
 from sqlalchemy.orm import selectinload
 from fastapi_pagination import Params
-from schemas.doc_format_sch import (DocFormatSch, DocFormatUpdateSch, DocFormatCreateSch, DocFormatByIdSch)
+from schemas.doc_format_sch import (DocFormatSch, DocFormatUpdateSch, DocFormatCreateSch)
 from schemas.response_sch import (PostResponseBaseSch, GetResponseBaseSch, GetResponsePaginatedSch, create_response)
 from models.doc_format_model import DocFormat
 import crud
@@ -37,7 +37,7 @@ async def get_no_page():
 
     return create_response(data=objs)
 
-@router.get("/{id}", response_model=GetResponseBaseSch[DocFormatByIdSch])
+@router.get("/{id}", response_model=GetResponseBaseSch[DocFormatSch])
 async def get_by_id(id: str):
 
     obj = await crud.doc_format.get_by_id(id=id)
@@ -57,7 +57,7 @@ async def create(request: Request, sch: DocFormatCreateSch):
 
     return create_response(data=obj)
 
-@router.put("/{id}", response_model=PostResponseBaseSch[DocFormatByIdSch], status_code=status.HTTP_201_CREATED)
+@router.put("/{id}", response_model=PostResponseBaseSch[DocFormatSch], status_code=status.HTTP_201_CREATED)
 async def update(id: str, request: Request, obj_new: DocFormatUpdateSch):
     
     if hasattr(request.state, 'login_user'):
