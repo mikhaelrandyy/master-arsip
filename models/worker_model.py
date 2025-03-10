@@ -9,7 +9,7 @@ if  TYPE_CHECKING:
 class WorkerBase(SQLModel):
     client_id: str = Field(nullable=True)
     status: bool = Field(default=True)
-    dept_id: str = Field(nullable=True, foreign_key='departement.id')
+    departement_id: str = Field(nullable=True, foreign_key='departement.id')
 
 class WorkerFullBase(BaseULIDModel, WorkerBase):
     pass

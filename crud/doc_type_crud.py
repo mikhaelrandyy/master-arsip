@@ -112,8 +112,8 @@ class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
         query = query.outerjoin(DocTypeGroup, DocTypeGroup.id == DocType.doc_type_group_id
                     ).outerjoin(columns_sq, columns_sq.c.id == DocType.id)
                     
-        query = query.join(DepartementDocType, DepartementDocType.doc_type_id == DocType.id
-                    ).join(Worker, Worker.dept_id == DepartementDocType.dept_id)
+        query = query.outerjoin(DepartementDocType, DepartementDocType.doc_type_id == DocType.id
+                    ).outerjoin(Worker, Worker.departement_id == DepartementDocType.dept_id)
 
         return query
 
