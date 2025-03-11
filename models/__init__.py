@@ -12,8 +12,13 @@ from .departement_doc_type_model import DepartementDocType
 from .code_counter_model import CodeCounter
 from .role_model import Role
 from .worker_model import Worker
-from .project_model import Project
 from .departement_model import Departement
 from .worker_role_model import WorkerRole
+
+from .project_model import Project
+from .vendor_model import Vendor
+from .unit_model import Unit
+from .customer_model import Customer
+from .company_model import Company
 
 
