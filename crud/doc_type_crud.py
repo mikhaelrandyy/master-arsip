@@ -3,7 +3,6 @@ from fastapi_async_sqlalchemy import db
 from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_pagination import Params, Page
 from sqlmodel import and_, select, cast, String, or_, func
-from sqlalchemy.orm import selectinload, joinedload
 from sqlmodel.ext.asyncio.session import AsyncSession
 from fastapi.encoders import jsonable_encoder
 from crud.base_crud import CRUDBase

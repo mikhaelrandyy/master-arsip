@@ -14,11 +14,14 @@ from .role_model import Role
 from .worker_model import Worker
 from .departement_model import Departement
 from .worker_role_model import WorkerRole
-
 from .project_model import Project
 from .vendor_model import Vendor
 from .unit_model import Unit
 from .customer_model import Customer
 from .company_model import Company
+from .memo_model import Memo
+from .memo_detail_model import MemoDetail
+from .attachment_model import Attachment
+
 
 

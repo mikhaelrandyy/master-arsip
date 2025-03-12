@@ -17,3 +17,5 @@ from .vendor_crud import vendor
 from .unit_crud import unit
 from .customer_crud import customer
 from .company_crud import company
+from .memo_crud import memo
+from .memo_detail_crud import memo_detail
