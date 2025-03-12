@@ -20,8 +20,8 @@ from .unit_model import Unit
 from .customer_model import Customer
 from .company_model import Company
 from .memo_model import Memo
-from .memo_detail_model import MemoDetail
-from .attachment_model import Attachment
+from .memo_dt_model import MemoDt
+from .memo_attachment_model import MemoAttachment
 
 
 

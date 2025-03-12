@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from models import DocFormat, Company, Project
 
 class MemoBase(SQLModel):
-    nomor_memo: str | None = Field(nullable=True)
+    no_memo: str | None = Field(nullable=True, unique=True)
     jenis_arsip: JenisArsipEnum = Field(nullable=True)
     doc_category: DocumentCategoryEnum = Field(nullable=True)
     doc_format_id: str | None = Field(foreign_key='doc_format.id')

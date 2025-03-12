@@ -1,15 +1,15 @@
 from sqlmodel import SQLModel
-from models.attachment_model import AttachmentBase, AttachmentFullBase
+from models.memo_attachment_model import MemoAttachmentBase, MemoAttachmentFullBase
 
-class AttachmentCreateSch(AttachmentBase):
+class AttachmentCreateSch(MemoAttachmentBase):
     pass
 
-class AttachmentSch(AttachmentFullBase):
+class AttachmentSch(MemoAttachmentFullBase):
     pass 
 
-class AttachmentUpdateSch(AttachmentBase):
+class AttachmentUpdateSch(MemoAttachmentBase):
     pass
 
-class AttachmentByIdSch(AttachmentFullBase):
+class AttachmentByIdSch(MemoAttachmentFullBase):
     pass
 
