@@ -16,19 +16,18 @@ class CRUDDocTypeGroup(CRUDBase[DocTypeGroup, DocTypeGroupCreateSch, DocTypeGrou
         response = await db.session.execute(query)
         return response.scalar_one_or_none()
      
-    async def create(self, *, sch:DocTypeGroupCreateSch, created_by:str, db_session: AsyncSession | None = None) -> DocTypeGroup:
-        db_session = db_session or db.session
+    async def create(self, *, sch:DocTypeGroupCreateSch, created_by:str) -> DocTypeGroup:
 
-        sch.code = await generate_code(entity=CodeCounterEnum.DOC_TYPE_GROUP, db_session=db_session)
+        sch.code = await generate_code(entity=CodeCounterEnum.DOC_TYPE_GROUP)
 
         doc_type_group = DocTypeGroup.model_validate(sch)
         if created_by:
             doc_type_group.created_by = doc_type_group.updated_by = created_by
 
-        db_session.add(doc_type_group)
+        db.session.add(doc_type_group)
             
-        await db_session.commit()
-        await db_session.refresh(doc_type_group)
+        await db.session.commit()
+        await db.session.refresh(doc_type_group)
 
         return doc_type_group
     

@@ -16,8 +16,7 @@ class CRUDColumnType(CRUDBase[ColumnType, ColumnTypeCreateSch, ColumnTypeUpdateS
         response = await db.session.execute(query)
         return response.scalar_one_or_none()
     
-    async def create(self, *, sch:ColumnTypeCreateSch, created_by:str, db_session: AsyncSession | None = None) -> ColumnType:
-        db_session = db_session or db.session
+    async def create(self, *, sch:ColumnTypeCreateSch, created_by:str) -> ColumnType:
 
         if sch.data_type == DataTypeEnum.ENUM:
             if sch.enum_data is None:
@@ -28,9 +27,9 @@ class CRUDColumnType(CRUDBase[ColumnType, ColumnTypeCreateSch, ColumnTypeUpdateS
         if created_by:
             column_type.created_by = column_type.updated_by = created_by
 
-        db_session.add(column_type)
-        await db_session.commit()
-        await db_session.refresh(column_type)
+        db.session.add(column_type)
+        await db.session.commit()
+        await db.session.refresh(column_type)
 
         return column_type
      

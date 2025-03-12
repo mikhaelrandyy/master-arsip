@@ -60,20 +60,3 @@ async def update(request: Request, id: str, obj_new: DocTypeUpdateSch):
     obj_updated = await crud.doc_type.update_and_mapping_w_doc_format(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
     response_obj = await crud.doc_type.get_by_id(id=obj_updated.id)
     return create_response(data=response_obj)
-
-@router.post("/mapping/column_type/{id}", response_model=PostResponseBaseSch[DocTypeSch], status_code=status.HTTP_201_CREATED)
-async def mapping_doc_type_column(request: Request, id:str, column_type_ids: list[str]):
-    
-    """Create a new Mapping"""
-
-    obj_current = await crud.doc_type.get(id=id)
-    if not obj_current:
-        raise IdNotFoundException(DocType, id=id)
-
-    await crud.doc_type.update_and_mapping_w_column_type(obj_current=obj_current, column_type_ids=column_type_ids)
-
-    response_obj = await crud.doc_type.get_by_id(id=obj_current.id)
-    return create_response(data=response_obj)
-
-
-

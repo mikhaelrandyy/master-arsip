@@ -16,19 +16,18 @@ class CRUDDocFormat(CRUDBase[DocFormat, DocFormatCreateSch, DocFormatUpdateSch])
         response = await db.session.execute(query)
         return response.scalar_one_or_none()
     
-    async def create(self, *, sch:DocFormatCreateSch, created_by:str, db_session: AsyncSession | None = None) -> DocFormat:
-        db_session = db_session or db.session
+    async def create(self, *, sch:DocFormatCreateSch, created_by:str) -> DocFormat:
 
-        sch.code = await generate_code(entity=CodeCounterEnum.DOC_FORMAT, db_session=db_session)
+        sch.code = await generate_code(entity=CodeCounterEnum.DOC_FORMAT)
 
         doc_format = DocFormat.model_validate(sch)
 
         if created_by:
             doc_format.created_by = doc_format.updated_by = created_by
 
-        db_session.add(doc_format)
-        await db_session.commit()
-        await db_session.refresh(doc_format)
+        db.session.add(doc_format)
+        await db.session.commit()
+        await db.session.refresh(doc_format)
 
         return doc_format
         
