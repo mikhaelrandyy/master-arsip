@@ -5,6 +5,7 @@ from schemas.doc_type_column_sch import DocTypeColumnSch
 
 class DocTypeCreateSch(DocTypeBase):
     doc_archives: list[DocTypeArchiveCreateSch] | None = []
+    doc_type_columns: list[str] | None = []
 
 class DocTypeSch(DocTypeFullBase):
     doc_type_group_name: str | None = None
@@ -16,3 +17,4 @@ class DocTypeByIdSch(DocTypeSch):
 
 class DocTypeUpdateSch(DocTypeBase):
     doc_archives: list[DocTypeArchiveUpdateSch] | None = []
+    doc_type_columns: list[str] | None = []

@@ -11,4 +11,9 @@ from .code_counter_crud import code_counter
 from .departement_doc_type_crud import departement_doc_type
 from .worker_crud import worker
 from .role_crud import role
+
 from .project_crud import project
+from .vendor_crud import vendor
+from .unit_crud import unit
+from .customer_crud import customer
+from .company_crud import company

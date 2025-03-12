@@ -19,30 +19,32 @@ import json
 
 class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
 
-    async def create_and_mapping_w_doc_format(self, *, sch:DocTypeCreateSch, created_by:str, db_session: AsyncSession | None = None) -> DocType:
-        db_session = db_session or db.session
-
-        sch.code = await generate_code(entity=CodeCounterEnum.DOC_TYPE, db_session=db_session)
+    async def create_and_mapping_w_doc_format(self, *, sch:DocTypeCreateSch, created_by:str) -> DocType:
+        
+        sch.code = await generate_code(entity=CodeCounterEnum.DOC_TYPE)
 
         db_obj = DocType(**sch.model_dump())
 
         if created_by:
             db_obj.created_by = db_obj.updated_by = created_by
 
-        db_session.add(db_obj)
-        await db_session.flush()
-        await db_session.refresh(db_obj)
+        db.session.add(db_obj)
+        await db.session.flush()
 
         for obj in sch.doc_archives:
-            db_obj_mapping = DocTypeArchive(doc_format_id=obj.doc_format_id, doc_type_id=db_obj.id, jenis_arsip=obj.jenis_arsip)
-            db_session.add(db_obj_mapping)
-            
-        await db_session.commit()
+            db_obj_map_archive = DocTypeArchive(doc_format_id=obj.doc_format_id, doc_type_id=db_obj.id, jenis_arsip=obj.jenis_arsip)
+            db.session.add(db_obj_map_archive)
+
+        for columns in sch.doc_type_columns:
+            db_obj_map_column = DocTypeColumn(doc_type_id=db_obj.id, column_type_id=columns)
+            db.session.add(db_obj_map_column)
+        
+        await db.session.commit()
+        await db.session.refresh(db_obj)
 
         return db_obj
 
-    async def update_and_mapping_w_doc_format(self, *, obj_current:DocType, obj_new:DocTypeUpdateSch, updated_by:str, db_session: AsyncSession | None = None) -> DocType:
-        db_session = db_session or db.session
+    async def update_and_mapping_w_doc_format(self, *, obj_current:DocType, obj_new:DocTypeUpdateSch, updated_by:str) -> DocType:
 
         obj_data = jsonable_encoder(obj_current)
         update_data = obj_new if isinstance(obj_new, dict) else obj_new.dict(exclude_unset=True)
@@ -53,8 +55,8 @@ class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
             elif updated_by and updated_by != "" and field == "updated_by":
                 setattr(obj_current, field, updated_by)
 
-        db_session.add(obj_current)
-        await db_session.flush()
+        db.session.add(obj_current)
+        await db.session.flush()
 
         current_doc_type_archives = await crud.doc_type_archive.get_by_doc_type(doc_type_id=obj_current.id)
 
@@ -66,32 +68,25 @@ class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
                 if not doc_format:
                     raise HTTPException(status_code=404, detail=f"Document format not found!")
 
-                db_obj_mapping = DocTypeArchive(doc_format_id=dt.id, doc_type_id=obj_current.id, jenis_arsip=dt.jenis_arsip)
-                db_session.add(db_obj_mapping)
+                db_obj_map_archive = DocTypeArchive(doc_format_id=dt.id, doc_type_id=obj_current.id, jenis_arsip=dt.jenis_arsip)
+                db.session.add(db_obj_map_archive)
             else:
                 current_doc_type_archives.remove(current_doc_type_archive)
 
         for remove in current_doc_type_archives:
-            await crud.doc_type_archive.remove(doc_type_id=remove.doc_type_id, doc_format_id=remove.doc_format_id, jenis_arsip=remove.jenis_arsip)
+            await db.session.delete(remove)
 
-        await db_session.commit()
-        await db_session.refresh(obj_current)
-
-        return obj_current
-
-    async def update_and_mapping_w_column_type(self, *, obj_current: DocType, column_type_ids: list[str]):
-        
         current_doc_type_columns = await crud.doc_type_column.get_by_doc_type(doc_type_id=obj_current.id)
         
-        for column_type_id in column_type_ids:
+        for column_type_id in obj_new.doc_type_columns:
             doc_type_column = await crud.doc_type_column.get_doc_type_column(doc_type_id=obj_current.id, column_type_id=column_type_id)
             if not doc_type_column:
                 column_type = await crud.column_type.get(id=column_type_id)
                 if not column_type:
                     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Selected column not found!")
                 
-                db_obj = DocTypeColumn(doc_type_id=obj_current.id, column_type_id=column_type_id)
-                db.session.add(db_obj)
+                db_obj_map_column = DocTypeColumn(doc_type_id=obj_current.id, column_type_id=column_type_id)
+                db.session.add(db_obj_map_column)
                 await db.session.flush()
             else:
                 current_doc_type_columns.remove(doc_type_column)
@@ -100,6 +95,9 @@ class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
             await db.session.delete(current_doc_type_column)
 
         await db.session.commit()
+        await db.session.refresh(obj_current)
+
+        return obj_current
 
     async def get_paginated(self, *, params: Params | None = Params(), login_user: AccessToken | None = None, **kwargs):
         query = self.base_query()
