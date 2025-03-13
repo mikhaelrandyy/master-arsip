@@ -6,7 +6,7 @@ from sqlalchemy.orm import selectinload, joinedload
 from fastapi_pagination import Params, Page
 from crud.base_crud import CRUDBase
 from sqlmodel import and_, select, cast, String, or_, func
-from models import Memo, MemoDt, MemoAttachment
+from models import Memo, MemoDoc, MemoDocAttachment
 from common.generator import generate_code
 from common.enum import CodeCounterEnum
 from schemas.memo_sch import MemoCreateSch, MemoUpdateSch
@@ -24,7 +24,7 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
      
     async def create_memo_w_detail(self, *, sch:MemoCreateSch, created_by:str) -> Memo:
         
-        sch.no_memo = await generate_code(entity=CodeCounterEnum.MEMO)
+        sch.code = await generate_code(entity=CodeCounterEnum.MEMO)
 
         db_memo = Memo.model_validate(sch)
 
@@ -34,21 +34,20 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
         db.session.add(db_memo)
 
         for detail in sch.memo_details:
-            db_detail = MemoDt(doc_type_id=detail.doc_type_id, 
+            db_detail = MemoDoc(doc_type_id=detail.doc_type_id, 
                                   unit_id=detail.unit_id, 
-                                  nomor=detail.nomor, 
-                                  name=detail.name,
-                                  company_id=detail.company_id, 
-                                  tanggal=detail.tanggal, 
+                                  doc_no=detail.doc_no, 
+                                  doc_name=detail.doc_name,
                                   alashak_id=detail.alashak_id, 
-                                  tipe_doc_fisik=detail.tipe_doc_fisik, 
+                                  physical_doc_type=detail.physical_doc_type, 
                                   remarks=detail.remarks,
+                                  notaris_id=detail.notaris_id,
                                   created_by=created_by,
                                   updated_by=created_by)
             db.session.add(db_detail)
 
             for attachment in detail.attachments:
-                db_attachment = MemoAttachment(memo_dt_id=db_detail.id, file_path=attachment.file_path, created_by=created_by, updated_by=created_by)
+                db_attachment = MemoDocAttachment(memo_doc_id=db_detail.id, file_name=attachment.file_name, file_url=attachment.file_url, created_by=created_by, updated_by=created_by)
                 db.session.add(db_attachment)
 
         await db.session.commit()

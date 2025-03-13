@@ -100,6 +100,20 @@ class TypeDocFisikEnum(str, Enum):
     LEGALISIR = "LEGALISIR"
     SALINAN = "SALINAN"
 
+class OutgoingtoTypeEnum(str, Enum):
+    CUSTOMER = "CUSTOMER"
+    BANK = "BANK"
+    NOTARIS = "NOTARIS"
+    INTERNAL = "INTERNAL"
+    TRANSFER = "TRANSFER"
 
+class OutgoingToDocType(str, Enum):
+    ASLI = "ASLI"
+    COPY = "COPY"
+    TRANSFER = "TRANSFER"
+
+class StatusDocArchiveEnum(str, Enum):
+    AVAILABLE = "AVAILABLE"
+    UNAVAILABLE = "UNAVAILABLE"
 
 

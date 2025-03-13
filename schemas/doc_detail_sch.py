@@ -1,16 +1,16 @@
 from sqlmodel import SQLModel
-from models.memo_dt_model import MemoDtBase, MemoDtFullBase
+from models.memo_doc_model import MemoDocBase, MemoDocFullBase
 from schemas.attachment_sch import AttachmentCreateSch
 
-class MemoDetailCreateSch(MemoDtBase):
+class MemoDetailCreateSch(MemoDocBase):
     attachments: list[AttachmentCreateSch] | None
 
-class MemoDetailSch(MemoDtFullBase):
+class MemoDetailSch(MemoDocFullBase):
     pass 
 
-class MemoDetailUpdateSch(MemoDtBase):
+class MemoDetailUpdateSch(MemoDocBase):
     pass
 
-class MemoDetailByIdSch(MemoDtFullBase):
+class MemoDetailByIdSch(MemoDocFullBase):
     pass
 
