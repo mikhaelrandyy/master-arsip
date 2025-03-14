@@ -10,6 +10,7 @@ from models import Memo, MemoDoc, MemoDocAttachment, Project, Company
 from common.generator import generate_code
 from common.enum import CodeCounterEnum
 from schemas.memo_sch import MemoCreateSch, MemoUpdateSch, MemoByIdSch
+from schemas.memo_doc_sch import MemoDocSch
 from schemas.oauth import AccessToken
 import crud
 
@@ -43,48 +44,95 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
             await db.session.flush()
 
             for attachment in detail.memo_attachments:
-                db_attachment = MemoDocAttachment(memo_doc_id=db_detail.id, file_name=attachment.file_name, file_url=attachment.file_url, created_by=created_by, updated_by=created_by)
+                db_attachment = MemoDocAttachment(memo_doc_id=db_detail.id, 
+                                                  file_name=attachment.file_name, 
+                                                  file_url=attachment.file_url, 
+                                                  created_by=created_by, 
+                                                  updated_by=created_by)
                 db.session.add(db_attachment)
 
-        # await db.session.commit()
+        await db.session.commit()
         return db_memo
     
-    # async def update_and_mapping_w_doc_detail(self, *, obj_current:Memo, obj_new:MemoUpdateSch, updated_by:str) -> Memo:
+    async def update_and_mapping_w_doc_detail(self, *, obj_current:Memo, obj_new:MemoUpdateSch, updated_by:str) -> Memo:
 
-    #     obj_data = jsonable_encoder(obj_current)
-    #     update_data = obj_new if isinstance(obj_new, dict) else obj_new.dict(exclude_unset=True)
+        obj_data = jsonable_encoder(obj_current)
+        update_data = obj_new if isinstance(obj_new, dict) else obj_new.dict(exclude_unset=True)
 
-    #     for field in obj_data:
-    #         if field in update_data:
-    #             setattr(obj_current, field, update_data[field])
-    #         elif updated_by and updated_by != "" and field == "updated_by":
-    #             setattr(obj_current, field, updated_by)
+        for field in obj_data:
+            if field in update_data:
+                setattr(obj_current, field, update_data[field])
+            elif updated_by and updated_by != "" and field == "updated_by":
+                setattr(obj_current, field, updated_by)
 
-    #     db.session.add(obj_current)
-    #     await db.session.flush()
+        db.session.add(obj_current)
+        await db.session.flush()
 
-    #     current_doc_detail = await crud.doc_detail.get_by_doc_type(doc_type_id=obj_current.id)
+        current_memo_docs = await crud.memo_doc.get_by_memo_id(memo_id=obj_current.id)
 
-    #     for dt in obj_new.doc_archives:
-    #         current_doc_type_archive = await crud.doc_type_archive.get_doc_type_archive(doc_type_id=obj_current.id, doc_format_id=dt.id, jenis_arsip=dt.jenis_arsip)
+        for doc in obj_new.memo_docs:
+            memo_doc = await crud.memo_doc.get_by_memo_id_w_memo_doc_id(memo_id=obj_current.id, 
+                                                                        memo_doc_id=doc.id, 
+                                                                        doc_archive_id=doc.doc_archive_id)
 
-    #         if not current_doc_type_archive:
-    #             doc_format = await crud.doc_format.get(id=dt.id)
-    #             if not doc_format:
-    #                 raise HTTPException(status_code=404, detail=f"Document format not found!")
+            if memo_doc:
+                current_memo_docs.remove(memo_doc)
+            else:
+                db_memo_doc = MemoDoc.model_validate(doc)
+                db.session.add(db_memo_doc)
+                
+        for remove in current_memo_docs:
+            await db.session.delete(remove)
 
-    #             db_obj_map_archive = DocTypeArchive(doc_format_id=dt.id, doc_type_id=obj_current.id, jenis_arsip=dt.jenis_arsip)
-    #             db.session.add(db_obj_map_archive)
-    #         else:
-    #             current_doc_type_archives.remove(current_doc_type_archive)
+        # await db.session.commit()
+        await db.session.refresh(obj_current)
 
-    #     for remove in current_doc_type_archives:
-    #         await db.session.delete(remove)
+        return obj_current
+    
 
-    #     await db.session.commit()
-    #     await db.session.refresh(obj_current)
+    async def get_by_id(self, *, id:str):
+        memo = await self.fetch_memo(id=id)
+        if not memo: 
+            return None
+        
+        memo = MemoByIdSch(**memo._mapping)
+        memo.memo_docs = await self.fetch_memo_docs(memo_id=id)
+        
+        return memo
+    
+    async def fetch_memo(self, **kwargs):
+        query = self.base_query()
+        query = self.create_filter(query=query, filter=kwargs)
 
-    #     return obj_current
+        response = await db.session.execute(query)
+
+        return response.one_or_none()
+    
+    # async def fetch_memo_docs(self, memo_id:str):
+
+    #     memo_documents = []
+
+    #     memo_docs = await crud.memo_doc.fetch_memo_id(memo_id=memo_id)
+    #     if not memo_docs: 
+    #         return []
+        
+    #     for memo_doc in memo_docs:
+    #         doc = MemoDocSch(
+    #                 memo_id=memo_doc.get("memo_id", ""),
+    #                 doc_archive_id=memo_doc.get("doc_archive_id", None),
+    #                 doc_type_id=memo_doc.get("doc_type_id", ""),
+    #                 doc_no=memo_doc.get("doc_no", ""),
+    #                 doc_name=memo_doc.get("doc_name", None),
+    #                 unit_id=memo_doc.get("unit_id", None),
+    #                 alashak_id=memo_doc.get("alashak_id", None),
+    #                 physical_doc_type=memo_doc.get("physical_doc_type"),
+    #                 remarks=memo_doc.get("remarks", ""),
+    #                 vendor_id=memo_doc.get("vendor_id", None)
+    #             )
+    #         # doc = MemoDocSch(**memo_doc)
+    #         memo_documents.append(doc)
+
+    #     return memo_documents
 
     async def get_paginated(self, *, params: Params | None = Params(), **kwargs):
         query = self.base_query()
@@ -124,20 +172,5 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
             query = query.order_by(order_column.desc())
 
         return query
-
-    async def get_by_id(self, *, id:str):
-        memo = await self.fetch_memo(id=id)
-        if not memo: 
-            return None
-        
-        return memo
-    
-    async def fetch_memo(self, **kwargs):
-        query = self.base_query()
-        query = self.create_filter(query=query, filter=kwargs)
-
-        response = await db.session.execute(query)
-
-        return response.one_or_none()
     
 memo = CRUDMemo(Memo)

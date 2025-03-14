@@ -22,8 +22,9 @@ async def generate_code(entity: CodeCounterEnum, db_session: AsyncSession | None
             year = datetime.today().year
             month = datetime.today().month
             last_two_digit = str(year)[-2:]
+            month_two_digit = f"{month:02d}"
 
-            return f"{entity.value}-{last_two_digit}{month}-{code}"
+            return f"{entity.value}-{last_two_digit}{month_two_digit}-{code}"
 
         return f"{entity.value}-{code}"
 
@@ -39,6 +40,15 @@ async def generate_code(entity: CodeCounterEnum, db_session: AsyncSession | None
         await crud.code_counter.update(obj_current=obj_current, obj_new=obj_new, db_session=db_session)
 
         code = str(code_counter).zfill(max_digit)
+
+        if CodeCounterEnum.MEMO:
+            year = datetime.today().year
+            month = datetime.today().month
+            last_two_digit = str(year)[-2:]
+            month_two_digit = f"{month:02d}"
+
+            return f"{entity.value}-{last_two_digit}{month_two_digit}-{code}"
+        
         return f"{entity.value}-{code}"
 
 
