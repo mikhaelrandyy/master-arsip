@@ -19,7 +19,7 @@ async def get_list(search:str | None = None, params: Params=Depends()):
         query = query.filter(
                 or_(
                     cast(Worker.client_id, String).ilike(f'%{search}%'),
-                    cast(Worker.status, String).ilike(f'%{search}%')
+                    cast(Worker.is_active, String).ilike(f'%{search}%')
                 )
             )
 

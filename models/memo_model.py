@@ -21,7 +21,7 @@ class MemoBase(SQLModel):
     remarks:str | None = Field(nullable=True)
     outgoing_to_type: OutgoingToTypeEnum | None = Field(nullable=True)
     outgoing_to_notaris_id: str | None = Field(nullable=True)
-    outgoing_to_departement_id: str | None = Field(nullable=True, foreign_key="departement.id")
+    outgoing_to_department_id: str | None = Field(nullable=True, foreign_key="department.id")
     outgoing_doc_type: OutgoingToDocTypeEnum | None = Field(nullable=True)
     outgoing_to_jenis_arsip: JenisArsipEnum | None = Field(nullable=True)
 
