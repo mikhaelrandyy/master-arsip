@@ -28,7 +28,7 @@ class DocArchiveFullBase(BaseULIDModel, DocArchiveBase):
     pass
 
 class DocArchive(DocArchiveFullBase, table=True):
-    doc_type: "DocType" = Relationship(sa_relationship_kwargs={"lazy": "select"})
+    pass
 
     
     

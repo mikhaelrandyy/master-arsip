@@ -3,6 +3,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from models.code_counter_model import CodeCounter
 from common.enum import  CodeCounterEnum
 import crud
+from datetime import datetime
 
 async def generate_code(entity: CodeCounterEnum, db_session: AsyncSession | None = None) -> str:
 
@@ -16,6 +17,14 @@ async def generate_code(entity: CodeCounterEnum, db_session: AsyncSession | None
         await crud.code_counter.create(obj_in=obj_in, db_session=db_session)
 
         code = str(code_counter).zfill(max_digit)
+
+        if CodeCounterEnum.MEMO:
+            year = datetime.today().year
+            month = datetime.today().month
+            last_two_digit = str(year)[-2:]
+
+            return f"{entity.value}-{last_two_digit}{month}-{code}"
+
         return f"{entity.value}-{code}"
 
     else:

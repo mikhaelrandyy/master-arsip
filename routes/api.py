@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from configs.permission import Permission
-from routes.endpoints import doc_format, doc_type, doc_type_group, departement, column_type, alashak, worker, role, project, memo
+from routes.endpoints import doc_format, doc_type, doc_type_group, departement, column_type, alashak, worker, role, project, memo, company
 
 api_router = APIRouter(dependencies=[Depends(Permission().get_login_user)])
 
@@ -16,6 +16,8 @@ api_router.include_router(memo.router, prefix="/memo", tags=["memo"])
 api_router.include_router(worker.router, prefix="/worker", tags=["worker"])
 api_router.include_router(role.router, prefix="/role", tags=["role"])
 api_router.include_router(project.router, prefix="/project", tags=["project"])
+api_router.include_router(company.router, prefix="/company", tags=["company"])
+
 
 
 

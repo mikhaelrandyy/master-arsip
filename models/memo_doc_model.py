@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 class MemoDocBase(SQLModel):
     memo_id: str | None = Field(nullable=False, foreign_key='memo.id')
     doc_archive_id: str | None = Field(foreign_key='doc_archive.id')
-    doc_type_id: str = Field(nullable=False)
+    doc_type_id: str = Field(nullable=False, foreign_key='doc_type.id')
     doc_no: str = Field(nullable=False)
     doc_name: str | None = Field(nullable=True)
     unit_id: str | None = Field(foreign_key='unit.id')
@@ -22,8 +22,8 @@ class MemoDocBase(SQLModel):
 class MemoDocFullBase(BaseULIDModel, MemoDocBase):
     pass
 
-class MemoDoc(MemoDocFullBase, table=True):pass
-
+class MemoDoc(MemoDocFullBase, table=True):
+    pass
 
 
     

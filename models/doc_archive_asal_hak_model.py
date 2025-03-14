@@ -14,4 +14,4 @@ class DocArchiveAsalHakFullBase(BaseULIDModel, DocArchiveAsalHakBase):
     pass
 
 class DocArchiveAsalHak(DocArchiveAsalHakFullBase, table=True):
-    doc_archive: "DocArchive" = Relationship(sa_relationship_kwargs={"lazy": "select"})
+    pass
