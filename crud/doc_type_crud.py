@@ -3,7 +3,6 @@ from fastapi_async_sqlalchemy import db
 from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_pagination import Params, Page
 from sqlmodel import and_, select, cast, String, or_, func
-from sqlalchemy.orm import selectinload, joinedload
 from sqlmodel.ext.asyncio.session import AsyncSession
 from fastapi.encoders import jsonable_encoder
 from crud.base_crud import CRUDBase
@@ -19,7 +18,7 @@ import json
 
 class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
 
-    async def create_and_mapping_w_doc_format(self, *, sch:DocTypeCreateSch, created_by:str) -> DocType:
+    async def create_and_mapping_w_doc_format_column(self, *, sch:DocTypeCreateSch, created_by:str) -> DocType:
         
         sch.code = await generate_code(entity=CodeCounterEnum.DOC_TYPE)
 
@@ -44,7 +43,7 @@ class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
 
         return db_obj
 
-    async def update_and_mapping_w_doc_format(self, *, obj_current:DocType, obj_new:DocTypeUpdateSch, updated_by:str) -> DocType:
+    async def update_and_mapping_w_doc_format_column(self, *, obj_current:DocType, obj_new:DocTypeUpdateSch, updated_by:str) -> DocType:
 
         obj_data = jsonable_encoder(obj_current)
         update_data = obj_new if isinstance(obj_new, dict) else obj_new.dict(exclude_unset=True)
@@ -105,7 +104,7 @@ class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
 
         return await paginate(db.session, query, params)
 
-    async def get_no_page(self, *, login_user, **kwargs):
+    async def get_no_paginated(self, *, login_user: AccessToken | None = None, **kwargs):
         query = self.base_query()
         query = self.create_filter(query=query, filter=kwargs, login_user=login_user)
         response = await db.session.execute(query)

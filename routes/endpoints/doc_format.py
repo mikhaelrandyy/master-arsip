@@ -66,7 +66,7 @@ async def update(id: str, request: Request, obj_new: DocFormatUpdateSch):
     obj_current = await crud.doc_format.get(id=id)
 
     if not obj_current:
-        raise HTTPException(status_code=404, detail=f"Document Type Group tidak ditemukan")
+        raise HTTPException(status_code=404, detail=f"Document Format tidak ditemukan")
 
     obj_updated = await crud.doc_format.update(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
 

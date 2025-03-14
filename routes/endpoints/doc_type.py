@@ -23,7 +23,7 @@ async def get_list(request: Request, search: str | None = None, order_by: str | 
 async def get_no_page(request: Request, search: str | None = None, order_by: str | None = None,):
 
     login_user : AccessToken = request.state.login_user
-    objs = await crud.doc_type.get_no_page(login_user=login_user, search=search, order_by=order_by)
+    objs = await crud.doc_type.get_no_paginated(login_user=login_user, search=search, order_by=order_by)
 
     return create_response(data=objs)
 
@@ -43,7 +43,7 @@ async def create(request: Request, sch: DocTypeCreateSch):
     """Create a new object"""
 
     login_user : AccessToken = request.state.login_user
-    obj = await crud.doc_type.create_and_mapping_w_doc_format(sch=sch, created_by=login_user.client_id)
+    obj = await crud.doc_type.create_and_mapping_w_doc_format_column(sch=sch, created_by=login_user.client_id)
     response_obj = await crud.doc_type.get_by_id(id=obj.id)
 
     return create_response(data=response_obj)
@@ -57,6 +57,6 @@ async def update(request: Request, id: str, obj_new: DocTypeUpdateSch):
     if not obj_current:
         raise HTTPException(status_code=404, detail=f"Document Type tidak ditemukan")
 
-    obj_updated = await crud.doc_type.update_and_mapping_w_doc_format(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
+    obj_updated = await crud.doc_type.update_and_mapping_w_doc_format_column(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
     response_obj = await crud.doc_type.get_by_id(id=obj_updated.id)
     return create_response(data=response_obj)

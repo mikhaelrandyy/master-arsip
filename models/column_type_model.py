@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 class ColumnTypeBase(SQLModel):
     name: str = Field(nullable=False)
-    data_type: DataTypeEnum = Field(nullable=False)
+    data_type: DataTypeEnum = Field(nullable=True)
     enum_data: str | None = Field(nullable=True, default=None)
     is_mandatory: bool = Field(nullable=True)
     

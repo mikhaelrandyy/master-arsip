@@ -57,7 +57,7 @@ async def update(id: str, request: Request, obj_new: RoleUpdateSch):
     obj_current = await crud.role.get(id=id)
 
     if not obj_current:
-        raise HTTPException(status_code=404, detail=f"Document Type Group tidak ditemukan")
+        raise HTTPException(status_code=404, detail=f"Role tidak ditemukan")
 
     obj_updated = await crud.role.update(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
 

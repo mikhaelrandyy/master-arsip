@@ -20,6 +20,17 @@ class DocumentClassificationEnum(str, Enum):
     AJB_HOLDING = "AJB HOLDING"
     BPHTH = "BPHTH"
 
+class NecessityEnum(str, Enum):
+    KELUAR_KE_KONSUMEN = "KELUAR KE KONSUMEN"
+    KELUAR_KE_BANK = "KELUAR KE BANK"
+    PENGGABUNGAN = "PENGGABUNGAN"
+    PROSES_AJB = "PROSES AJB" 
+    CHECK_INTERNAL = "CHECK INTERNAL"
+    PEMECAHAN = "PEMECAHAN"
+    PERPANJANGAN = "PERPANJANGAN"
+    REVISI = "REVISI"
+    PEMISAHAN = "PEMISAHAN"
+
 class GroupingDocumentEnum(str, Enum):
     DATA_UTAMA = "DATA UTAMA"
     DATA_PENDUKUNG = "DATA PENDUKUNG"
@@ -41,6 +52,7 @@ class CodeCounterEnum(str, Enum):
     DOC_FORMAT = "CDF"
     DOC_TYPE = "CJD"
     DOC_TYPE_GROUP = "GJD"
+    MEMO = "ASG"
 
 class CustomerDevEnum(str, Enum):
     PERSON = "person"
@@ -81,8 +93,27 @@ class AddressEnum(str, Enum):
     OTHER = "lainnya"
     UNKNOWN = "-"
 
+class PhysicalDocTypeEnum(str, Enum):
+    ASLI = "ASLI"
+    DUPLIKAT = "DUPLIKAT"
+    COPY = "COPY"
+    LEGALISIR = "LEGALISIR"
+    SALINAN = "SALINAN"
 
+class OutgoingToTypeEnum(str, Enum):
+    CUSTOMER = "CUSTOMER"
+    BANK = "BANK"
+    NOTARIS = "NOTARIS"
+    INTERNAL = "INTERNAL"
+    TRANSFER = "TRANSFER"
 
+class OutgoingToDocTypeEnum(str, Enum):
+    ASLI = "ASLI"
+    COPY = "COPY"
+    TRANSFER = "TRANSFER"
 
+class StatusDocArchiveEnum(str, Enum):
+    AVAILABLE = "AVAILABLE"
+    UNAVAILABLE = "UNAVAILABLE"
 
 
