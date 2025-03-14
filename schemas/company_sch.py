@@ -4,7 +4,7 @@ from sqlmodel import SQLModel
 class CompanyCreateSch(CompanyBase):
     pass
 
-class CompanySch(CompanyBase):
+class CompanySch(Company):
     pass
 
 class CompanyUpdateSch(CompanyBase):

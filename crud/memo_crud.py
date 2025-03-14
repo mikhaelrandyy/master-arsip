@@ -6,24 +6,16 @@ from sqlalchemy.orm import selectinload, joinedload
 from fastapi_pagination import Params, Page
 from crud.base_crud import CRUDBase
 from sqlmodel import and_, select, cast, String, or_, func
-from models import Memo, MemoDoc, MemoDocAttachment
+from models import Memo, MemoDoc, MemoDocAttachment, Project, Company
 from common.generator import generate_code
 from common.enum import CodeCounterEnum
-from schemas.memo_sch import MemoCreateSch, MemoUpdateSch
+from schemas.memo_sch import MemoCreateSch, MemoUpdateSch, MemoByIdSch
 from schemas.oauth import AccessToken
 import crud
 
 class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
-    async def get_by_id(self, *, id:str) -> Memo:
-
-        query = select(Memo)
-        query = query.where(Memo.id == id)
-        query = query.options(selectinload(Memo.project), selectinload(Memo.company))
-        response = await db.session.execute(query)
-        return response.scalar_one_or_none()
-     
     async def create_memo_w_detail(self, *, sch:MemoCreateSch, created_by:str) -> Memo:
-        
+
         sch.code = await generate_code(entity=CodeCounterEnum.MEMO)
 
         db_memo = Memo.model_validate(sch)
@@ -32,25 +24,29 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
             db_memo.created_by = db_memo.updated_by = created_by
 
         db.session.add(db_memo)
+        await db.session.flush()
 
-        for detail in sch.memo_details:
-            db_detail = MemoDoc(doc_type_id=detail.doc_type_id, 
-                                  unit_id=detail.unit_id, 
-                                  doc_no=detail.doc_no, 
-                                  doc_name=detail.doc_name,
-                                  alashak_id=detail.alashak_id, 
-                                  physical_doc_type=detail.physical_doc_type, 
-                                  remarks=detail.remarks,
-                                  notaris_id=detail.notaris_id,
-                                  created_by=created_by,
-                                  updated_by=created_by)
+        for detail in sch.memo_docs:
+            db_detail = MemoDoc(memo_id=db_memo.id,
+                                doc_archive_id=detail.doc_archive_id,
+                                doc_type_id=detail.doc_type_id, 
+                                doc_no=detail.doc_no, 
+                                doc_name=detail.doc_name,
+                                unit_id=detail.unit_id, 
+                                alashak_id=detail.alashak_id, 
+                                physical_doc_type=detail.physical_doc_type, 
+                                remarks=detail.remarks,
+                                created_by=created_by,
+                                updated_by=created_by)
+
             db.session.add(db_detail)
+            await db.session.flush()
 
-            for attachment in detail.attachments:
+            for attachment in detail.memo_attachments:
                 db_attachment = MemoDocAttachment(memo_doc_id=db_detail.id, file_name=attachment.file_name, file_url=attachment.file_url, created_by=created_by, updated_by=created_by)
                 db.session.add(db_attachment)
 
-        await db.session.commit()
+        # await db.session.commit()
         return db_memo
     
     # async def update_and_mapping_w_doc_detail(self, *, obj_current:Memo, obj_new:MemoUpdateSch, updated_by:str) -> Memo:
@@ -97,13 +93,22 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
         return await paginate(db.session, query, params)
     
     def base_query(self):
+
+        query = select(
+                    *Memo.__table__.columns,
+                    Project.code.label('project_code'),
+                    Company.code.label('company_code')
+                )
         
-        query = select(Memo)
-        query = query.options(selectinload(Memo.project), selectinload(Memo.company))
-        
+        query = query.outerjoin(Project, Project.id == Memo.project_id,
+                            ).outerjoin(Company, Company.id == Memo.company_id)
         return query
 
     def create_filter(self, *, query, filter:dict):
+        
+        if filter.get("id"):
+            memo_id = filter.get("id")
+            query = query.filter(Memo.id == memo_id)
 
         if filter.get("search"):
             search = filter.get("search")
@@ -119,5 +124,20 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
             query = query.order_by(order_column.desc())
 
         return query
+
+    async def get_by_id(self, *, id:str):
+        memo = await self.fetch_memo(id=id)
+        if not memo: 
+            return None
+        
+        return memo
+    
+    async def fetch_memo(self, **kwargs):
+        query = self.base_query()
+        query = self.create_filter(query=query, filter=kwargs)
+
+        response = await db.session.execute(query)
+
+        return response.one_or_none()
     
 memo = CRUDMemo(Memo)
