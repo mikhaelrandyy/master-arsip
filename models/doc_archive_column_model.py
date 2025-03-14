@@ -7,15 +7,13 @@ if TYPE_CHECKING:
 
 
 class DocArchiveColumnBase(SQLModel):
-    doc_archive_id: str | None = Field(nullable=True, foreign_key='doc_archive.id')
-    column_type_id: str | None = Field(nullable=True, foreign_key='column_type.id')
+    doc_archive_id: str | None = Field(nullable=False, foreign_key='doc_archive.id')
+    column_type_id: str | None = Field(nullable=False, foreign_key='column_type.id')
     value: str | None = Field(nullable=True)
 
 class DocArchiveColumnFullBase(BaseULIDModel, DocArchiveColumnBase):
     pass
 
-class DocArchiveColumn(DocArchiveColumnFullBase, table=True):
-    doc_archives: list["DocArchive"] = Relationship(sa_relationship_kwargs={"lazy": "select"})
-    column_types: list["ColumnType"] = Relationship(sa_relationship_kwargs={"lazy": "select"})
+class DocArchiveColumn(DocArchiveColumnFullBase, table=True):pass
 
     

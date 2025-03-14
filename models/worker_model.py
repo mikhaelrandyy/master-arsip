@@ -7,8 +7,8 @@ if  TYPE_CHECKING:
     from models import Role, Departement
 
 class WorkerBase(SQLModel):
-    client_id: str = Field(nullable=True)
-    status: bool = Field(default=True, nullable=False)
+    client_id: str = Field(nullable=False)
+    is_active: bool = Field(default=True, nullable=False)
     departement_id: str = Field(nullable=False, foreign_key='departement.id')
 
 class WorkerFullBase(BaseULIDModel, WorkerBase):

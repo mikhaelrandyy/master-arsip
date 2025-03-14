@@ -7,8 +7,8 @@ if TYPE_CHECKING:
 
 
 class DocArchiveAsalHakBase(SQLModel):
-    doc_archive_id: str | None = Field(nullable=True, foreign_key='doc_archive.id')
-    doc_archive_asal_id: str | None = Field(nullable=True)
+    doc_archive_id: str | None = Field(nullable=False, foreign_key='doc_archive.id')
+    doc_archive_asal_id: str | None = Field(nullable=False, foreign_key='doc_archive.id')
 
 class DocArchiveAsalHakFullBase(BaseULIDModel, DocArchiveAsalHakBase):
     pass

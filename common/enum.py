@@ -93,21 +93,21 @@ class AddressEnum(str, Enum):
     OTHER = "lainnya"
     UNKNOWN = "-"
 
-class TypeDocFisikEnum(str, Enum):
+class PhysicalDocTypeEnum(str, Enum):
     ASLI = "ASLI"
     DUPLIKAT = "DUPLIKAT"
     COPY = "COPY"
     LEGALISIR = "LEGALISIR"
     SALINAN = "SALINAN"
 
-class OutgoingtoTypeEnum(str, Enum):
+class OutgoingToTypeEnum(str, Enum):
     CUSTOMER = "CUSTOMER"
     BANK = "BANK"
     NOTARIS = "NOTARIS"
     INTERNAL = "INTERNAL"
     TRANSFER = "TRANSFER"
 
-class OutgoingToDocType(str, Enum):
+class OutgoingToDocTypeEnum(str, Enum):
     ASLI = "ASLI"
     COPY = "COPY"
     TRANSFER = "TRANSFER"

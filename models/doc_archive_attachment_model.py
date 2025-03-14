@@ -2,7 +2,7 @@ from models.base_model import BaseULIDModel
 from sqlmodel import SQLModel, Field, Relationship
 from models.doc_archive_column_model import DocArchiveColumn
 from typing import TYPE_CHECKING
-from common.enum import TypeDocFisikEnum, JenisArsipEnum, StatusDocArchiveEnum
+from common.enum import PhysicalDocTypeEnum, JenisArsipEnum, StatusDocArchiveEnum
 
 
 if TYPE_CHECKING:
