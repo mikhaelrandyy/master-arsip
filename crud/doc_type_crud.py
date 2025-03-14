@@ -7,7 +7,7 @@ from sqlalchemy.orm import selectinload, joinedload
 from sqlmodel.ext.asyncio.session import AsyncSession
 from fastapi.encoders import jsonable_encoder
 from crud.base_crud import CRUDBase
-from models import DocType, DocTypeArchive, DocTypeGroup, DepartementDocType, Worker, DocTypeColumn
+from models import DocType, DocTypeArchive, DocTypeGroup, DepartmentDocType, Worker, DocTypeColumn
 from schemas.oauth import AccessToken
 from schemas.doc_type_sch import DocTypeCreateSch, DocTypeUpdateSch, DocTypeSch, DocTypeByIdSch
 from schemas.doc_type_archive_sch import DocTypeArchiveCreateSch, DocTypeArchiveSch
@@ -139,8 +139,8 @@ class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
         query = query.outerjoin(DocTypeGroup, DocTypeGroup.id == DocType.doc_type_group_id
                     ).outerjoin(count_columns_sq, count_columns_sq.c.id == DocType.id)
                     
-        query = query.outerjoin(DepartementDocType, DepartementDocType.doc_type_id == DocType.id
-                    ).outerjoin(Worker, Worker.departement_id == DepartementDocType.departement_id)
+        query = query.outerjoin(DepartmentDocType, DepartmentDocType.doc_type_id == DocType.id
+                    ).outerjoin(Worker, Worker.department_id == DepartmentDocType.department_id)
         
         query = query.distinct()
 

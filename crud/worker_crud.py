@@ -13,7 +13,7 @@ class CRUDWorker(CRUDBase[Worker, WorkerCreateSch, WorkerUpdateSch]):
 
         query = select(Worker)
         query = query.where(Worker.id == id)
-        query = query.options(selectinload(Worker.roles), selectinload(Worker.departement))
+        query = query.options(selectinload(Worker.roles), selectinload(Worker.department))
         response = await db.session.execute(query)
         return response.scalar_one_or_none()
     

@@ -7,12 +7,12 @@ from .doc_type_column_model import DocTypeColumn
 # from .doc_archive_column_model import DocArchiveColumn
 from .column_type_model  import ColumnType
 from .alashak_model import Alashak
-from .departement_model import Departement
-from .departement_doc_type_model import DepartementDocType
+from .department_model import Department
+from .department_doc_type_model import DepartmentDocType
 from .code_counter_model import CodeCounter
 from .role_model import Role
 from .worker_model import Worker
-from .departement_model import Departement
+from .department_model import Department
 from .worker_role_model import WorkerRole
 
 from .project_model import Project
