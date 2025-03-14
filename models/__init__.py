@@ -20,6 +20,7 @@ from .company_model import Company
 
 from .memo_model import Memo
 from .memo_doc_model import MemoDoc
+from .memo_doc_column_model import MemoDocColumn
 from .memo_doc_attachment_model import MemoDocAttachment
 from .memo_doc_asal_hak_model import MemoDocAsalHak
 

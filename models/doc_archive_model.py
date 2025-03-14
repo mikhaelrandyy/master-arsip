@@ -24,12 +24,11 @@ class DocArchiveBase(SQLModel):
     jenis_arsip: JenisArsipEnum = Field(nullable=False)
     status: StatusDocArchiveEnum | None = Field(nullable=True)
     
-    
-
 class DocArchiveFullBase(BaseULIDModel, DocArchiveBase):
     pass
 
-class DocArchive(DocArchiveFullBase, table=True):pass
+class DocArchive(DocArchiveFullBase, table=True):
+    doc_type: "DocType" = Relationship(sa_relationship_kwargs={"lazy": "select"})
 
     
     
