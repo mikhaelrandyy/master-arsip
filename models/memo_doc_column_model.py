@@ -13,9 +13,7 @@ class MemoDocColumnBase(SQLModel):
 class MemoDocColumnFullBase(BaseULIDModel, MemoDocColumnBase):
     pass
 
-class MemoDocColumn(MemoDocColumnFullBase, table=True):
-    memo_doc: "MemoDoc" = Relationship(sa_relationship_kwargs = {"lazy": "select"})
-    column_type: "ColumnType" = Relationship(sa_relationship_kwargs = {"lazy": "select"})
+class MemoDocColumn(MemoDocColumnFullBase, table=True):pass 
 
     
 

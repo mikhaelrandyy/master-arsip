@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from models import MemoDoc
 
 class MemoDocAttachmentBase(SQLModel):
-    memo_doc_id: str | None = Field(nullable=False, foreign_key='memo_doc.id')
+    memo_doc_id: str | None = Field(nullable=False, foreign_key='memo_doc.id', default=None)
     file_name: str | None = Field(nullable=True)
     file_url: str | None = Field(nullable=True)
 

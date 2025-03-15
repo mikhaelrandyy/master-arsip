@@ -42,7 +42,7 @@ async def create(request: Request, sch: MemoCreateSch):
     
     """Create a new object"""
     login_user: AccessToken = request.state.login_user
-    obj = await crud.memo.create_memo_w_detail(sch=sch, created_by=login_user.client_id)
+    obj = await crud.memo.create(memo=sch, created_by=login_user.client_id)
     response_obj = await crud.memo.get_by_id(id=obj.id)
     return create_response(data=response_obj)
 

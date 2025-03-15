@@ -30,7 +30,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         self.db = db
 
     async def get(
-        self, *, id: str, db_session: AsyncSession | None = None
+        self, *, id: str | None = None, db_session: AsyncSession | None = None
     ) -> ModelType | None:
         db_session = db_session or db.session
         query = select(self.model).where(self.model.id == id)

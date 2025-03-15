@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from models import Unit, Company, MemoDocAttachment
 
 class MemoDocBase(SQLModel):
-    memo_id: str | None = Field(nullable=False, foreign_key='memo.id')
+    memo_id: str | None = Field(nullable=False, foreign_key='memo.id', default=None)
     doc_archive_id: str | None = Field(foreign_key='doc_archive.id')
     doc_type_id: str = Field(nullable=False, foreign_key='doc_type.id')
     doc_no: str = Field(nullable=False)

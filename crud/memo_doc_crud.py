@@ -14,9 +14,9 @@ class CRUDMemoDoc(CRUDBase[MemoDoc, MemoDocCreateSch, MemoDocUpdateSch]):
         response = await db.session.execute(query)
         return response.scalar_one_or_none()
     
-    async def get_by_memo_id(self, *, memo_id:str) -> list[MemoDoc]:
+    async def get_by_memo(self, *, memo_id:str) -> list[MemoDoc]:
 
-        query = self.base_query()
+        query = select(MemoDoc)
         query = query.where(MemoDoc.memo_id == memo_id)
         response = await db.session.execute(query)
         return response.scalars().all()
