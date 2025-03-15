@@ -13,6 +13,7 @@ from schemas.memo_sch import MemoCreateSch, MemoUpdateSch, MemoByIdSch
 from schemas.memo_doc_sch import MemoDocCreateSch, MemoDocUpdateSch, MemoDocSch
 from schemas.memo_doc_attachment_sch import MemoDocAttachmentCreateSch, MemoDocAttachmentUpdateSch, MemoDocAttachmentSch
 from schemas.oauth import AccessToken
+from datetime import datetime, timezone
 import crud
 
 class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
@@ -129,6 +130,9 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
                         setattr(memo_doc, field, update_data[field])
                     elif updated_by and updated_by != "" and field == "updated_by":
                         setattr(memo_doc, field, updated_by)
+                    elif field == "updated_at":
+                        setattr(memo_doc, field, datetime.now(timezone.utc).replace(tzinfo=None))
+                                
 
                 db.session.add(memo_doc)
                 await db.session.flush()
