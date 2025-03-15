@@ -121,7 +121,17 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
                 if updated_by:
                     db_obj_doc.created_by = db_obj_doc.updated_by = updated_by
             else:
-                pass
+                obj_data = jsonable_encoder(memo_doc)
+                update_data = doc if isinstance(doc, dict) else doc.dict(exclude_unset=True)
+
+                for field in obj_data:
+                    if field in update_data:
+                        setattr(memo_doc, field, update_data[field])
+                    elif updated_by and updated_by != "" and field == "updated_by":
+                        setattr(memo_doc, field, updated_by)
+
+                db.session.add(memo_doc)
+                await db.session.flush()
                 
         for remove in current_memo_docs:
             await db.session.delete(remove)
