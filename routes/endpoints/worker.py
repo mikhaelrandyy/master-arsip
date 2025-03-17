@@ -13,27 +13,13 @@ router = APIRouter()
 @router.get("", response_model=GetResponsePaginatedSch[WorkerSch])
 async def get_list(search:str | None = None, params: Params=Depends()):
 
-    query = select(Worker)
-
-    if search:
-        query = query.filter(
-                or_(
-                    cast(Worker.client_id, String).ilike(f'%{search}%'),
-                    cast(Worker.is_active, String).ilike(f'%{search}%')
-                )
-            )
-
-    objs = await crud.worker.get_multi_paginated_ordered(query=query, params=params)
-
+    objs = await crud.worker.get_paginated(params=params, search=search)
     return create_response(data=objs)
 
 @router.get("/no-page", response_model=GetResponseBaseSch[list[WorkerSch]])
-async def get_no_page():
+async def get_no_page(search:str | None = None):
 
-    query = select(Worker)
-
-    objs = await crud.worker.get_all_ordered(query=query, order_by="created_at")
-
+    objs = await crud.worker.get_no_paginated(search=search)
     return create_response(data=objs)
 
 @router.get("/{id}", response_model=GetResponseBaseSch[WorkerByIdSch])
@@ -45,6 +31,17 @@ async def get_by_id(id: str):
         raise IdNotFoundException(Worker, id)
     
     return create_response(data=obj)
+
+@router.get("/by-client-id/{client_id}", response_model=GetResponseBaseSch[WorkerByIdSch])
+async def get_by_id(client_id: str):
+
+    obj = await crud.worker.get_by_client_id(client_id=client_id)
+
+    if obj is None:
+        raise IdNotFoundException(Worker, id)
+    
+    return create_response(data=obj)
+
 
 @router.post("", response_model=PostResponseBaseSch[WorkerSch], status_code=status.HTTP_201_CREATED)
 async def create(request: Request, sch: WorkerCreateSch):
@@ -69,7 +66,7 @@ async def update(id: str, request: Request, obj_new: WorkerUpdateSch):
 
     obj_updated = await crud.worker.update(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
 
-    response_obj = await crud.worker.get_by_id(id=obj_updated.id)
+    response_obj = await crud.worker.get_by_id(id=id)
     return create_response(data=response_obj)
 
 

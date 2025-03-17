@@ -2,14 +2,20 @@ from models.base_model import BaseULIDModel
 from sqlmodel import SQLModel, Field, Relationship
 from typing import TYPE_CHECKING
 from models.worker_role_model import WorkerRole
+from pydantic import field_validator
 
 if  TYPE_CHECKING:
     from models import Role, Department
 
 class WorkerBase(SQLModel):
-    client_id: str = Field(nullable=True)
+    name: str | None = Field(nullable=True)
+    client_id: str = Field(nullable=True, unique=True) #email
     is_active: bool = Field(default=True, nullable=False)
     department_id: str = Field(nullable=False, foreign_key='department.id')
+
+    @field_validator('client_id')
+    def validate_code(cls, value):
+        return value.lower()
 
 class WorkerFullBase(BaseULIDModel, WorkerBase):
     pass

@@ -47,5 +47,6 @@ class CRUDDocFormat(CRUDBase[DocFormat, DocFormatCreateSch, DocFormatUpdateSch])
                         cast(DocFormat.classification, String).ilike(f'%{search}%')
                     )
                 )
+        return query
         
 doc_format = CRUDDocFormat(DocFormat)

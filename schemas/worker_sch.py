@@ -3,7 +3,6 @@ from schemas.role_sch import RoleCreateForMappingSch
 from schemas.project_sch import ProjectCreateForMappingSch
 
 class WorkerCreateSch(WorkerBase):
-    department_id: str | None
     roles: list[RoleCreateForMappingSch] | None
  
 class WorkerSch(WorkerFullBase):
@@ -12,5 +11,5 @@ class WorkerSch(WorkerFullBase):
 class WorkerUpdateSch(WorkerBase):
     pass
 
-class WorkerByIdSch(WorkerFullBase):
-    roles: list[RoleCreateForMappingSch] | None
+class WorkerByIdSch(WorkerSch):
+    roles: list[RoleCreateForMappingSch] | None = []
