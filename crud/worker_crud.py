@@ -38,7 +38,7 @@ class CRUDWorker(CRUDBase[Worker, WorkerCreateSch, WorkerUpdateSch]):
         if not worker:
             return None
         
-        worker = WorkerSch(worker._mapping)
+        worker = WorkerSch(**worker._mapping)
         return worker
     
     async def create(self, *, sch:WorkerCreateSch, created_by:str, db_session: AsyncSession | None = None) -> Worker:

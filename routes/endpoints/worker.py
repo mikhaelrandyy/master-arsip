@@ -33,7 +33,7 @@ async def get_by_id(id: str):
     return create_response(data=obj)
 
 @router.get("/by-client-id/{client_id}", response_model=GetResponseBaseSch[WorkerByIdSch])
-async def get_by_id(client_id: str):
+async def get_by_client_id(client_id: str):
 
     obj = await crud.worker.get_by_client_id(client_id=client_id)
 
