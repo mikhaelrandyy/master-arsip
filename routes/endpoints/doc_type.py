@@ -1,29 +1,32 @@
 from fastapi import APIRouter, status, HTTPException, Request, Depends
 from sqlmodel import select, or_, cast, String
 from fastapi_pagination import Params
+from models import (
+    DocType, 
+    DocTypeGroup
+)
 from schemas.oauth import AccessToken
 from schemas.response_sch import PostResponseBaseSch, GetResponseBaseSch, GetResponsePaginatedSch, create_response
 from schemas.doc_type_sch import (DocTypeSch, DocTypeUpdateSch, DocTypeCreateSch, DocTypeByIdSch)
 from schemas.doc_type_column_sch import DocTypeColumnCreateUpdateSch
-from models.doc_type_model import DocType
-from models import DocTypeGroup
+from common.enum import JenisArsipEnum
 import crud
 from utils.exceptions.common_exception import IdNotFoundException
 
 router = APIRouter()
 
 @router.get("", response_model=GetResponsePaginatedSch[DocTypeSch])
-async def get_list(request: Request, search: str | None = None, order_by: str | None = None, params: Params=Depends()):
+async def get_list(request: Request, search: str | None = None, order_by: str | None = None, params: Params=Depends(), jenis_arsip:JenisArsipEnum | None = None):
 
     login_user: AccessToken = request.state.login_user
-    objs = await crud.doc_type.get_paginated(search=search, order_by=order_by, params=params, login_user=login_user)
+    objs = await crud.doc_type.get_paginated(login_user=login_user, params=params, search=search, order_by=order_by, jenis_arsip=jenis_arsip)
     return create_response(data=objs)
 
 @router.get("/no-page", response_model=GetResponseBaseSch[list[DocTypeSch]])
-async def get_no_page(request: Request, search: str | None = None, order_by: str | None = None,):
+async def get_no_page(request: Request, search: str | None = None, order_by: str | None = None, jenis_arsip:JenisArsipEnum | None = None):
 
     login_user : AccessToken = request.state.login_user
-    objs = await crud.doc_type.get_no_paginated(login_user=login_user, search=search, order_by=order_by)
+    objs = await crud.doc_type.get_no_paginated(login_user=login_user, search=search, order_by=order_by, jenis_arsip=jenis_arsip)
 
     return create_response(data=objs)
 

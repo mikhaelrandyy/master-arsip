@@ -19,11 +19,11 @@ async def get_list(request: Request, search:str | None = None, order_by: str | N
     return create_response(data=objs)
 
 @router.get("/no-page", response_model=GetResponseBaseSch[list[MemoSch]])
-async def get_no_page():
+async def get_no_page(search:str | None = None, order_by: str | None = None,):
 
     query = select(Memo)
 
-    objs = await crud.memo.get_all_ordered(query=query, order_by="created_at")
+    objs = await crud.memo.get_no_paginated(search=search, order_by=order_by)
 
     return create_response(data=objs)
 
@@ -58,7 +58,6 @@ async def update(id: str, request: Request, obj_new: MemoUpdateSch):
         raise HTTPException(status_code=404, detail=f"Memo tidak ditemukan")
 
     obj_updated = await crud.memo.update(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
-
     response_obj = await crud.memo.get_by_id(id=obj_updated.id)
     return create_response(data=response_obj)
 

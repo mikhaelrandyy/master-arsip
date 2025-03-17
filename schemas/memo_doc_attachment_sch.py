@@ -7,7 +7,7 @@ class MemoDocAttachmentSch(MemoDocAttachmentFullBase):
     pass 
 
 class MemoDocAttachmentUpdateSch(MemoDocAttachmentBase):
-    pass
+    id: str | None = None
 
 class MemoDocAttachmentByIdSch(MemoDocAttachmentFullBase):
     pass

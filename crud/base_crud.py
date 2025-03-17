@@ -225,7 +225,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         obj_current: ModelType,
         obj_new: UpdateSchemaType | Dict[str, Any] | ModelType,
         db_session: AsyncSession | None = None,
-        updated_by: str | None = None
+        updated_by: str | None = None,
+        with_commit: bool | None = True
     ) -> ModelType:
         db_session = db_session or db.session
         obj_data = jsonable_encoder(obj_current)
@@ -243,8 +244,10 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
                 setattr(obj_current, field, updated_by)
 
         db_session.add(obj_current)
-        await db_session.commit()
-        await db_session.refresh(obj_current)
+        if with_commit:
+            await db_session.commit()
+            await db_session.refresh(obj_current)
+            
         return obj_current
 
     async def remove(

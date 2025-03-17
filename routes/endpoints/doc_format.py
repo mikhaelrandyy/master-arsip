@@ -1,5 +1,4 @@
 from fastapi import APIRouter, status, HTTPException, Request, Depends
-from sqlmodel import select, or_, String, cast
 from sqlalchemy.orm import selectinload
 from fastapi_pagination import Params
 from schemas.doc_format_sch import (DocFormatSch, DocFormatUpdateSch, DocFormatCreateSch)
@@ -13,34 +12,21 @@ router = APIRouter()
 @router.get("", response_model=GetResponsePaginatedSch[DocFormatSch])
 async def get_list(search:str | None = None, params: Params=Depends()):
 
-    query = select(DocFormat)
-
-    if search:
-        query = query.filter(
-                or_(
-                    cast(DocFormat.code, String).ilike(f'%{search}%'),
-                    cast(DocFormat.name, String).ilike(f'%{search}%'),
-                    cast(DocFormat.classification, String).ilike(f'%{search}%')
-                )
-            )
-
-    objs = await crud.doc_format.get_multi_paginated_ordered(query=query, params=params)
+    objs = await crud.doc_format.get_paginated(params=params, search=search)
 
     return create_response(data=objs)
 
 @router.get("/no-page", response_model=GetResponseBaseSch[list[DocFormatSch]])
-async def get_no_page():
+async def get_no_page(search:str | None = None):
 
-    query = select(DocFormat)
-
-    objs = await crud.doc_format.get_all_ordered(query=query, order_by="created_at")
+    objs = await crud.doc_format.get_no_paginated(search=search)
 
     return create_response(data=objs)
 
 @router.get("/{id}", response_model=GetResponseBaseSch[DocFormatSch])
 async def get_by_id(id: str):
 
-    obj = await crud.doc_format.get_by_id(id=id)
+    obj = await crud.doc_format.get(id=id)
 
     if obj is None:
         raise IdNotFoundException(DocFormat, id)
@@ -69,9 +55,7 @@ async def update(id: str, request: Request, obj_new: DocFormatUpdateSch):
         raise HTTPException(status_code=404, detail=f"Document Format tidak ditemukan")
 
     obj_updated = await crud.doc_format.update(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
-
-    response_obj = await crud.doc_format.get_by_id(id=obj_updated.id)
-    return create_response(data=response_obj)
+    return create_response(data=obj_updated)
 
 
 

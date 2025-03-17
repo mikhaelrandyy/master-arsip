@@ -1,5 +1,7 @@
 from fastapi_async_sqlalchemy import db
-from sqlmodel import and_, select
+from fastapi_pagination import Params
+from fastapi_pagination.ext.sqlalchemy import paginate
+from sqlmodel import and_, select, or_, cast, String
 from sqlmodel.ext.asyncio.session import AsyncSession
 from crud.base_crud import CRUDBase
 from models import DocFormat
@@ -9,13 +11,6 @@ from common.enum import CodeCounterEnum
 import crud
 
 class CRUDDocFormat(CRUDBase[DocFormat, DocFormatCreateSch, DocFormatUpdateSch]):
-    async def get_by_id(self, *, id:str) -> DocFormat:
-
-        query = select(DocFormat)
-        query = query.where(DocFormat.id == id)
-        response = await db.session.execute(query)
-        return response.scalar_one_or_none()
-    
     async def create(self, *, sch:DocFormatCreateSch, created_by:str) -> DocFormat:
 
         sch.code = await generate_code(entity=CodeCounterEnum.DOC_FORMAT)
@@ -30,5 +25,27 @@ class CRUDDocFormat(CRUDBase[DocFormat, DocFormatCreateSch, DocFormatUpdateSch])
         await db.session.refresh(doc_format)
 
         return doc_format
+    
+    async def get_paginated(self, *, params: Params, **kwargs):
+        query = select(DocFormat)
+        query = self.create_filter(query=query, filter=kwargs)
+
+        return await paginate(db.session, query, params)
+    
+    async def get_no_paginated(self, **kwargs):
+        query = select(DocFormat)
+        query = self.create_filter(query=query, filter=kwargs)
+        return await self.get_all_ordered(query=query)
+    
+    def create_filter(self, *, query, filter:dict):
+        if filter.get("search"):
+            search = filter.get("search")
+            query = query.filter(
+                    or_(
+                        cast(DocFormat.code, String).ilike(f'%{search}%'),
+                        cast(DocFormat.name, String).ilike(f'%{search}%'),
+                        cast(DocFormat.classification, String).ilike(f'%{search}%')
+                    )
+                )
         
 doc_format = CRUDDocFormat(DocFormat)
