@@ -21,6 +21,7 @@ from schemas.memo_sch import MemoCreateSch, MemoUpdateSch, MemoByIdSch
 from schemas.memo_doc_sch import MemoDocCreateSch, MemoDocUpdateSch, MemoDocSch
 from schemas.memo_doc_column_sch import MemoDocColumnCreateSch, MemoDocColumnUpdateSch, MemoDocColumnSch
 from schemas.memo_doc_attachment_sch import MemoDocAttachmentCreateSch, MemoDocAttachmentUpdateSch, MemoDocAttachmentSch
+from schemas.memo_doc_asal_hak_sch import MemoDocAsalHakCreateSch, MemoDocAsalHakUpdateSch, MemoDocAsalHakSch
 from schemas.oauth import AccessToken
 from datetime import datetime, timezone
 import crud
@@ -96,7 +97,8 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
 
         for memo_doc in obj_new.memo_docs:
             obj_current_memo_doc = await crud.memo_doc.get(id=memo_doc.id) if memo_doc.id else None
-            new_memo_doc = MemoDoc(**memo_doc.model_dump(), memo_id=obj_current.id)
+            new_memo_doc = MemoDoc(**memo_doc.model_dump())
+            new_memo_doc.memo_id=obj_current.id
             if not obj_current_memo_doc:
                 new_memo_doc = await crud.memo_doc.create(
                     obj_in=new_memo_doc, 
@@ -114,7 +116,8 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
 
             for memo_doc_column in memo_doc.memo_doc_columns:
                 obj_current_memo_doc_column = await crud.memo_doc_column.get(id=memo_doc_column.id)
-                new_memo_doc_column = MemoDocColumn(**memo_doc_column.model_dump(), memo_doc_id=new_memo_doc.id)
+                new_memo_doc_column = MemoDocColumn(**memo_doc_column.model_dump())
+                new_memo_doc_column.memo_doc_id=new_memo_doc.id
                 if not obj_current_memo_doc_column:
                     await crud.memo_doc_column.create(
                         obj_in=new_memo_doc_column,
@@ -132,7 +135,8 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
             
             for memo_doc_attachment in memo_doc.memo_doc_attachments:
                 obj_current_memo_doc_attachment = await crud.memo_doc_attachment.get(id=memo_doc_attachment.id)
-                new_memo_doc_attachment = MemoDocAttachment(**memo_doc_attachment.model_dump(), memo_doc_id=new_memo_doc.id)
+                new_memo_doc_attachment = MemoDocAttachment(**memo_doc_attachment.model_dump())
+                new_memo_doc_attachment.memo_doc_id=new_memo_doc.id
                 if not obj_current_memo_doc_attachment:
                     await crud.memo_doc_attachment.create(
                         obj_in=new_memo_doc_attachment,
@@ -149,7 +153,8 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
             
             for memo_doc_asal_hak in memo_doc.memo_doc_asal_haks:
                 obj_current_memo_doc_asal_hak = await crud.memo_doc_asal_hak.get(id=memo_doc_asal_hak.id)
-                new_memo_doc_asal_hak = MemoDocAsalHak(**memo_doc_asal_hak.model_dump(), memo_doc_id=new_memo_doc.id)
+                new_memo_doc_asal_hak = MemoDocAsalHak(**memo_doc_asal_hak.model_dump())
+                new_memo_doc_asal_hak.memo_doc_id=new_memo_doc.id
                 if not obj_current_memo_doc_asal_hak:
                     await crud.memo_doc_asal_hak.create(
                         obj_in=new_memo_doc_asal_hak,
@@ -285,7 +290,9 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
         
         memo_doc_asal_haks = []
         for memo_doc_asal_hak in asal_haks:
-            memo_doc_asal_hak = MemoDocColumnSch(**memo_doc_asal_hak)
+            memo_doc_asal_hak = MemoDocAsalHakSch(**memo_doc_asal_hak)
             memo_doc_asal_haks.append(memo_doc_asal_hak)
+
+        return memo_doc_asal_haks
 
 memo = CRUDMemo(Memo)

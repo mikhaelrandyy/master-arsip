@@ -37,8 +37,8 @@ class CRUDMemoDoc(CRUDBase[MemoDoc, MemoDocCreateSch, MemoDocUpdateSch]):
 
         query = select(
             *MemoDoc.__table__.columns,
-            Unit.code.lable("unit_code"),
-            Unit.descs.lable("unit_descs"),
+            Unit.code.label("unit_code"),
+            Unit.descs.label("unit_descs"),
             Alashak.code.label("alashak_code"),
             Alashak.name.label("alashak_name")
         )

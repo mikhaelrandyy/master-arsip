@@ -154,7 +154,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         db_session = db_session or db.session
         db_obj = self.model.model_validate(obj_in)  # type: ignore
         if created_by:
-            db_obj.created_by = created_by
+            db_obj.created_by = db_obj.updated_by = created_by
 
         try:
             db_session.add(db_obj)

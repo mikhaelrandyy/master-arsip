@@ -1,5 +1,5 @@
 from models.memo_model import MemoBase, MemoFullBase
-from schemas.memo_doc_sch import MemoDocCreateSch, MemoDocUpdateSch
+from schemas.memo_doc_sch import MemoDocCreateSch, MemoDocUpdateSch, MemoDocSch
 
 class MemoCreateSch(MemoBase):
     memo_docs: list[MemoDocCreateSch] | None = []
@@ -14,7 +14,6 @@ class MemoUpdateSch(MemoBase):
 class MemoByIdSch(MemoFullBase):
     project_code: str | None
     company_code: str | None
-    memo_docs: list[MemoDocCreateSch] | None = None
-
+    memo_docs: list[MemoDocSch] | None = []
 
 
