@@ -10,15 +10,14 @@ class DocumentCategoryEnum(str, Enum):
     UNHOLD = "UNHOLD"
 
 class DocumentClassificationEnum(str, Enum):
-    ARSIP_AJB = "ARSIP AJB"
-    ARSIP_HOLDING = "ARSIP HOLDING"
+    ARSIP = "ARSIP"
     PBB = "PBB"
     PBT = "PBT"
-    SPH_PJB_PPJB = "SPH/PJB/PPJB"
+    SPH_PJB_PPJB = "SPH_PJB_PPJB"
     SPS = "SPS"
-    TANDA_TERIMA_KONSUMEN_BANK = "TANDA TERIMA KONSUMEN / BANK"
-    AJB_HOLDING = "AJB HOLDING"
-    BPHTH = "BPHTH"
+    TANDA_TERIMA_KONSUMEN_BANK = "TANDA_TERIMA_KONSUMEN_BANK"
+    AJB_HOLDING = "AJB_HOLDING"
+    BPHTB = "BPHTB"
 
 class NecessityEnum(str, Enum):
     KELUAR_KE_KONSUMEN = "KELUAR KE KONSUMEN"
@@ -47,6 +46,10 @@ class DataTypeEnum(str, Enum):
     INTEGER = "INTEGER"
     DECIMAL = "DECIMAL"
     BOOLEAN = "BOOLEAN"
+    ALASHAK = "ALASHAK"
+    UNIT = "UNIT" 
+    CUSTOMER = "CUSTOMER"
+    VENDOR = "VENDOR"
 
 class CodeCounterEnum(str, Enum):
     DOC_FORMAT = "CDF"
@@ -115,5 +118,6 @@ class OutgoingToDocTypeEnum(str, Enum):
 class StatusDocArchiveEnum(str, Enum):
     AVAILABLE = "AVAILABLE"
     UNAVAILABLE = "UNAVAILABLE"
+
 
 

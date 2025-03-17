@@ -31,7 +31,7 @@ async def get_no_page():
 @router.get("/{id}", response_model=GetResponseBaseSch[AlashakByIdSch])
 async def get_by_id(id: str):
 
-    obj = await crud.alashak.get_by_id(id=id)
+    obj = await crud.alashak.get(id=id)
 
     if obj is None:
         raise IdNotFoundException(Alashak, id)
@@ -59,7 +59,7 @@ async def update(id: str, request: Request, obj_new: AlashakUpdateSch):
         raise HTTPException(status_code=404, detail=f"Document Type Group tidak ditemukan")
 
     obj_updated = await crud.alashak.update(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
-    response_obj = await crud.alashak.get_by_id(id=obj_updated.id)
+    response_obj = await crud.alashak.get(id=obj_updated.id)
     return create_response(data=response_obj)
 
 

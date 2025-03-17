@@ -17,5 +17,9 @@ from .vendor_crud import vendor
 from .unit_crud import unit
 from .customer_crud import customer
 from .company_crud import company
+
 from .memo_crud import memo
 from .memo_doc_crud import memo_doc
+from .memo_doc_column_crud import memo_doc_column
+from .memo_doc_attachment_crud import memo_doc_attachment
+from .memo_doc_asal_hak_crud import memo_doc_asal_hak

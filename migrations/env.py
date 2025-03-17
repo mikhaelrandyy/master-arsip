@@ -8,6 +8,7 @@ from sqlmodel import create_engine, SQLModel
 from alembic import context
 from configs.config import settings
 from models import *
+import alembic_postgresql_enum
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

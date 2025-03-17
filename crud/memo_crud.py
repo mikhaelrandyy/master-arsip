@@ -29,8 +29,17 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
         db.session.add(db_obj)
         await db.session.flush()
 
-        if memo.memo_docs:
-            await self.create_memo_docs(memo_docs=memo.memo_docs, memo_id=db_obj.id, created_by=created_by)
+        for memo_doc in memo.memo_docs:
+            memo_doc.memo_id = db_obj.id
+            memo_doc = await crud.memo_doc.create(
+                obj_in=memo_doc, 
+                created_by=created_by, 
+                with_commit=False
+            )
+
+            for memo_doc_column in memo_doc:
+                pass
+
 
         await db.session.commit()
         await db.session.refresh(db_obj)
@@ -140,7 +149,6 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
         for remove in current_memo_docs:
             await db.session.delete(remove)
         
-
     async def get_by_id(self, *, id:str):
         memo = await self.fetch_memo(id=id)
         if not memo: 
