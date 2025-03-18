@@ -14,7 +14,7 @@ class MemoBase(SQLModel):
     doc_format_id: str | None = Field(foreign_key='doc_format.id')
     project_id: str = Field(nullable=False, foreign_key='project.id')
     company_id: str = Field(nullable=False, foreign_key='company.id')
-    necessity: NecessityEnum = Field(nullable=True)
+    necessity: NecessityEnum | None = Field(nullable=True)
     file_name: str | None = Field(nullable=True)
     file_url: str | None = Field(nullable=True)
     return_date: date | None = Field(nullable=True)
