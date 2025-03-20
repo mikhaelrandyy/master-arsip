@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from fastapi_async_sqlalchemy import db
 from fastapi_pagination import Params
 from fastapi_pagination.ext.sqlalchemy import paginate
@@ -7,6 +8,7 @@ from sqlalchemy.orm import selectinload, joinedload
 from crud.base_crud import CRUDBase
 from models import Worker, WorkerRole, Department
 from schemas.worker_sch import WorkerCreateSch, WorkerUpdateSch, WorkerSch
+from schemas.common_sch import OrderEnumSch
 from itertools import product
 import crud
 
@@ -88,6 +90,17 @@ class CRUDWorker(CRUDBase[Worker, WorkerCreateSch, WorkerUpdateSch]):
                     Department.name.ilike(f'%{search}%')
                 )
             )
+        
+        if filter.get("order_by"):
+          if filter.get("order"):
+             order_column = getattr(Worker, filter.get('order_by'))
+             if order_column is None:
+                raise HTTPException(status_code=400, detail=f'Field {filter.get("order_by")} not found')
+             order = filter.get("order")
+             if order == OrderEnumSch.descendent:
+                   query = query.order_by(order_column.desc())
+             if order == OrderEnumSch.ascendent:
+                   query = query.order_by(order_column.asc())
 
         return query
     

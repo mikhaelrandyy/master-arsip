@@ -17,6 +17,7 @@ from models import (
 )
 from common.generator import generate_code
 from common.enum import CodeCounterEnum
+from schemas.common_sch import OrderEnumSch
 from schemas.memo_sch import MemoCreateSch, MemoUpdateSch, MemoByIdSch
 from schemas.memo_doc_sch import MemoDocCreateSch, MemoDocUpdateSch, MemoDocSch
 from schemas.memo_doc_column_sch import MemoDocColumnCreateSch, MemoDocColumnUpdateSch, MemoDocColumnSch
@@ -226,14 +227,21 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
             search = filter.get("search")
             query = query.filter(
                 or_(
-                    cast(Memo.no_memo, String).ilike(f'%{search}%'),
+                    cast(Memo.code, String).ilike(f'%{search}%'),
                     cast(Memo.created_by, String).ilike(f'%{search}%')
                 )
             )
             
         if filter.get("order_by"):
-            order_column = getattr(Memo, filter.get('order_by'))
-            query = query.order_by(order_column.desc())
+            if filter.get("order"):
+                order_column = getattr(Memo, filter.get('order_by'), None)
+                if order_column is None:
+                    raise HTTPException(status_code=400, detail=f'Field {filter.get("order_by")} not found')
+                order = filter.get("order")
+                if order == OrderEnumSch.descendent:
+                  query = query.order_by(order_column.desc())
+                if order == OrderEnumSch.ascendent:
+                  query = query.order_by(order_column.asc())
 
         return query
     

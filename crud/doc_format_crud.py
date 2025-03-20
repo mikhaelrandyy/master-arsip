@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from fastapi_async_sqlalchemy import db
 from fastapi_pagination import Params
 from fastapi_pagination.ext.sqlalchemy import paginate
@@ -6,6 +7,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from crud.base_crud import CRUDBase
 from models import DocFormat
 from schemas.doc_format_sch import DocFormatCreateSch, DocFormatUpdateSch
+from schemas.common_sch import OrderEnumSch
 from common.generator import generate_code
 from common.enum import CodeCounterEnum
 import crud
@@ -47,6 +49,17 @@ class CRUDDocFormat(CRUDBase[DocFormat, DocFormatCreateSch, DocFormatUpdateSch])
                         cast(DocFormat.classification, String).ilike(f'%{search}%')
                     )
                 )
+            
+        if filter.get("order_by"):
+            if filter.get("order"):
+               order_column = getattr(DocFormat, filter.get('order_by'), None)
+               if order_column is None:
+                    raise HTTPException(status_code=400, detail=f'Field {filter.get("order_by")} not found')
+               order = filter.get("order")
+               if order == OrderEnumSch.descendent:
+                     query = query.order_by(order_column.desc())
+               if order == OrderEnumSch.ascendent:
+                     query = query.order_by(order_column.asc())
         return query
         
 doc_format = CRUDDocFormat(DocFormat)
