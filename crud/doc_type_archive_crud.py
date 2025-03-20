@@ -38,6 +38,7 @@ class CRUDDocTypeArchive(CRUDBase[DocTypeArchive, DocTypeArchiveCreateSch,  DocT
         query = select(
             *DocTypeArchive.__table__.columns,
             DocFormat.name.label('doc_format_name'),
+            DocFormat.code.label('doc_format_code'),
             DocType.name.label('doc_type_name')
         )
 

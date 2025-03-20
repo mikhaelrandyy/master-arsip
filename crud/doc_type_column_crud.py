@@ -30,6 +30,9 @@ class CRUDDocTypeColumn(CRUDBase[DocTypeColumnSch, DocTypeColumnCreateSch, DocTy
         query = select(
             *DocTypeColumn.__table__.columns,
             ColumnType.name.label('column_name'),
+            ColumnType.is_mandatory.label('column_is_mandatory'),
+            ColumnType.data_type.label('column_data_type'),
+            ColumnType.enum_data.label('column_enum_data'),
             DocType.name.label('doc_type_name')
         )
 
