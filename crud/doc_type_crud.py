@@ -14,6 +14,7 @@ from models import (
     Worker, 
     DocTypeColumn
 )
+from schemas.common_sch import OrderEnumSch
 from schemas.oauth import AccessToken
 from schemas.doc_type_sch import DocTypeCreateSch, DocTypeUpdateSch, DocTypeSch, DocTypeByIdSch
 from schemas.doc_type_archive_sch import DocTypeArchiveCreateSch, DocTypeArchiveSch
@@ -21,7 +22,6 @@ from schemas.doc_type_column_sch import DocTypeColumnSch
 from common.generator import generate_code
 from common.enum import CodeCounterEnum
 import crud
-import json
 
 class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
 
@@ -168,9 +168,16 @@ class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
                 )
             
         if filter.get("order_by"):
-            order_column = getattr(DocType, filter.get('order_by'))
-            query = query.order_by(order_column.desc())
-
+            if filter.get("order"):
+                order_column = getattr(DocType, filter.get('order_by'), None)
+                if order_column is None:
+                    raise HTTPException(status_code=400, detail=f'Field {filter.get("order_by")} not found')
+                order = filter.get("order")
+                if order == OrderEnumSch.descendent:
+                    query = query.order_by(order_column.desc())
+                if order == OrderEnumSch.ascendent:
+                    query = query.order_by(order_column.asc())
+            
         if login_user and 'superadmin' not in login_user.authorities:
             query = query.filter(Worker.client_id == login_user.client_id)
         

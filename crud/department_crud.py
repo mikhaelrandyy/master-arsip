@@ -2,11 +2,10 @@ from fastapi import HTTPException, status
 from fastapi_async_sqlalchemy import db
 from fastapi_pagination import Params
 from fastapi_pagination.ext.sqlalchemy import paginate
-from sqlmodel.ext.asyncio.session import AsyncSession
-from sqlalchemy.orm import selectinload
 from sqlmodel import and_, select, or_, func
 from crud.base_crud import CRUDBase
 from models import Department, DepartmentDocType, DocType
+from schemas.common_sch import OrderEnumSch
 from schemas.department_sch import DepartmentCreateSch, DepartmentUpdateSch, DepartmentSch, DepartmentByIdSch
 from schemas.department_doc_type_sch import DepartmentDocTypeCreateSch, DepartmentDocTypeSch
 from schemas.oauth import AccessToken
@@ -20,7 +19,7 @@ class CRUDDepartment(CRUDBase[Department, DepartmentCreateSch, DepartmentUpdateS
 
       return await paginate(db.session, query, params)
    
-   async def get_no_page(self, *, login_user: AccessToken | None = None, **kwargs):
+   async def get_no_paginated(self, *, login_user: AccessToken | None = None, **kwargs):
       query = self.base_query()
       query = self.create_filter(query=query, login_user=login_user, filter=kwargs)
 
@@ -89,9 +88,16 @@ class CRUDDepartment(CRUDBase[Department, DepartmentCreateSch, DepartmentUpdateS
                )
          
       if filter.get("order_by"):
-            order_column = getattr(Department, filter.get('order_by'))
-            query = query.order_by(order_column.desc())
-
+         if filter.get("order"):
+            order_column = getattr(Department, filter.get('order_by'), None)
+            if order_column is None:
+               raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f'Field {filter.get("order_by")} not found')
+            order = filter.get("order")
+            if order == OrderEnumSch.descendent:
+                  query = query.order_by(order_column.desc())
+            if order == OrderEnumSch.ascendent:
+                  query = query.order_by(order_column.asc())
+      
       return query
 
    async def fetch_department(self, id: str):
