@@ -22,9 +22,12 @@ async def get_list(
     return create_response(data=objs)
 
 @router.get("/no-page", response_model=GetResponseBaseSch[list[CompanySch]])
-async def get_no_page(order_by:str | None = "created_at", order: OrderEnumSch | None = OrderEnumSch.descendent):
+async def get_no_page(
+    search: str | None = None,
+    order_by:str | None = "created_at", 
+    order: OrderEnumSch | None = OrderEnumSch.descendent):
 
-    objs = await crud.company.get_no_paginated(order_by=order_by, order=order)
+    objs = await crud.company.get_no_paginated(search=search, order_by=order_by, order=order)
     return create_response(data=objs)
 
 @router.get("/{id}", response_model=GetResponseBaseSch[CompanyByIdSch])
