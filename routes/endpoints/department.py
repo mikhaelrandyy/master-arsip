@@ -32,7 +32,7 @@ async def get_no_page(
     order: OrderEnumSch | None = OrderEnumSch.descendent
 ):
     login_user: AccessToken = request.state.login_user
-    objs = await crud.department.get_no_paginated(login_user=login_user, search=search, order_by=order_by, order=order)
+    objs = await crud.department.get_no_paginated(search=search, order_by=order_by, order=order, login_user=login_user)
     return create_response(data=objs)
 
 @router.get("/{id}", response_model=GetResponseBaseSch[DepartmentByIdSch])

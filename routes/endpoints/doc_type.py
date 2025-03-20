@@ -38,7 +38,7 @@ async def get_no_page(
     jenis_arsip:JenisArsipEnum | None = None):
 
     login_user : AccessToken = request.state.login_user
-    objs = await crud.doc_type.get_no_paginated(login_user=login_user, search=search, order_by=order_by, order=order, jenis_arsip=jenis_arsip)
+    objs = await crud.doc_type.get_no_paginated(search=search, order_by=order_by, order=order, jenis_arsip=jenis_arsip, login_user=login_user)
     return create_response(data=objs)
 
 @router.get("/{id}", response_model=GetResponseBaseSch[DocTypeByIdSch])
