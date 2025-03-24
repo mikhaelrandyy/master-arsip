@@ -119,5 +119,13 @@ class StatusDocArchiveEnum(str, Enum):
     AVAILABLE = "AVAILABLE"
     UNAVAILABLE = "UNAVAILABLE"
 
+class WorkflowEntityEnum(str, Enum):
+    MEMO = "MEMO"
 
-
+class WorkflowLastStatusEnum(str, Enum):
+    DRAFT = "DRAFT"
+    ISSUED = "ISSUED"
+    COMPLETED = "COMPLETED"
+    REJECTED = "REJECTED"
+    NEED_DATA_UPDATE = "NEED_DATA_UPDATE"
+    WAITING_APPROVAL = "WAITING_APPROVAL"

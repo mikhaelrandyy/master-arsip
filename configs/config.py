@@ -9,5 +9,8 @@ class Settings(BaseSettings):
     AZURE_CLIENT_ID: str
     AZURE_CLIENT_SECRET: str
     VS_AZURE_SCOPE: str
+    WF_BASE_URL: str = ""
+    WF_CLIENT_ID: str = ""
+    WF_PUBLIC_KEY: str = ""
 
 settings = Settings()

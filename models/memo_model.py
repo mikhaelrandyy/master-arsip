@@ -24,7 +24,7 @@ class MemoBase(SQLModel):
     outgoing_to_department_id: str | None = Field(nullable=True, foreign_key="department.id")
     outgoing_doc_type: OutgoingToDocTypeEnum | None = Field(nullable=True)
     outgoing_to_jenis_arsip: JenisArsipEnum | None = Field(nullable=True)
-
+    workflow_id: str | None = Field(foreign_key="workflow.id", nullable=True)
 
 class MemoFullBase(BaseULIDModel, MemoBase):
     pass
