@@ -2,6 +2,7 @@ from fastapi import HTTPException, status
 from fastapi_async_sqlalchemy import db
 from fastapi_pagination import Params
 from fastapi_pagination.ext.sqlalchemy import paginate
+from fastapi.encoders import jsonable_encoder
 from sqlmodel import and_, select, or_, func
 from crud.base_crud import CRUDBase
 from models import Department, DepartmentDocType, DocType
@@ -12,6 +13,55 @@ from schemas.oauth import AccessToken
 import crud
 
 class CRUDDepartment(CRUDBase[Department, DepartmentCreateSch, DepartmentUpdateSch]):
+   async def create_w_doc_type(self, *, obj_in: DepartmentCreateSch, created_by: str):
+      db_obj = Department(**obj_in.model_dump())
+      if created_by:
+            db_obj.created_by = db_obj.updated_by = created_by
+
+      db.session.add(db_obj)
+      await db.session.flush()
+
+      for obj in obj_in.doc_type_ids:
+         db_obj_map = DepartmentDocType(doc_type_id=obj, department_id=db_obj.id)
+         db.session.add(db_obj_map)
+
+      await db.session.commit()
+      await db.session.refresh(db_obj)
+
+      return db_obj
+   
+   async def update_w_doc_type(self, *, obj_current: Department, obj_new: DepartmentUpdateSch, updated_by: str):
+      obj_data = jsonable_encoder(obj_current)
+      update_data = obj_new if isinstance(obj_new, dict) else obj_new.dict(exclude_unset=True)
+
+      for field in obj_data:
+         if field in update_data:
+               setattr(obj_current, field, update_data[field])
+         elif updated_by and updated_by != "" and field == "updated_by":
+               setattr(obj_current, field, updated_by)
+
+      db.session.add(obj_current)
+      await db.session.flush()
+      
+      current_department_doc_types = await crud.department_doc_type.get_by_department(department_id=obj_current.id)
+      
+      for doc_type_id in obj_new.doc_type_ids:
+         department_doc_type = await crud.department_doc_type.get_department_doc_type(department_id=obj_current.id, doc_type_id=doc_type_id)
+         if not department_doc_type:
+            doc_type = await crud.doc_type.get(id=doc_type_id)
+            if not doc_type:
+               raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Selected document type not found!")
+            
+            db_obj = DepartmentDocType(doc_type_id=doc_type_id, department_id=obj_current.id)
+            db.session.add(db_obj)
+            await db.session.flush()
+         else:
+            current_department_doc_types.remove(department_doc_type)
+
+      for current_department_doc_type in current_department_doc_types:
+         await db.session.delete(current_department_doc_type)
+
+      await db.session.commit()
 
    async def get_paginated(self, *, params, login_user: AccessToken | None = None, **kwargs):
       query = self.base_query()
@@ -34,27 +84,6 @@ class CRUDDepartment(CRUDBase[Department, DepartmentCreateSch, DepartmentUpdateS
       department.doc_types = await self.fetch_department_doc_types(department_id=id)
 
       return department
-
-   async def update_and_mapping_w_doc_type(self, *, obj_current: Department, doc_type_ids: list[str] | None = []):
-      current_department_doc_types = await crud.department_doc_type.get_by_department(department_id=obj_current.id)
-      
-      for doc_type_id in doc_type_ids:
-         department_doc_type = await crud.department_doc_type.get_department_doc_type(department_id=obj_current.id, doc_type_id=doc_type_id)
-         if not department_doc_type:
-            doc_type = await crud.doc_type.get(id=doc_type_id)
-            if not doc_type:
-               raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Selected document type not found!")
-            
-            db_obj = DepartmentDocType(doc_type_id=doc_type_id, department_id=obj_current.id)
-            db.session.add(db_obj)
-            await db.session.flush()
-         else:
-            current_department_doc_types.remove(department_doc_type)
-
-      for current_department_doc_type in current_department_doc_types:
-         await db.session.delete(current_department_doc_type)
-
-      await db.session.commit()
 
    def base_query(self):
 

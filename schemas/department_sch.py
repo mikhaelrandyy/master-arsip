@@ -4,14 +4,14 @@ from sqlmodel import SQLModel
 
 
 class DepartmentCreateSch(DepartmentBase):
-    pass
+    doc_type_ids: list[str] | None = None
 
 class DepartmentSch(DepartmentFullBase):
     number_of_doc_types: int | None = None
 
 
 class DepartmentUpdateSch(DepartmentBase):
-    pass
+    doc_type_ids: list[str] | None = None
 
 class DepartmentByIdSch(DepartmentSch):
      doc_types: list[DocTypeSch] | None = None
