@@ -2,6 +2,7 @@ from fastapi import HTTPException, status
 from fastapi_async_sqlalchemy import db
 from fastapi_pagination import Params
 from fastapi_pagination.ext.sqlalchemy import paginate
+from fastapi.encoders import jsonable_encoder
 from sqlmodel import and_, select, or_, func
 from crud.base_crud import CRUDBase
 from models import Department, DepartmentDocType, DocType
@@ -12,6 +13,49 @@ from schemas.oauth import AccessToken
 import crud
 
 class CRUDDepartment(CRUDBase[Department, DepartmentCreateSch, DepartmentUpdateSch]):
+
+   async def get_paginated(self, *, params, login_user: AccessToken | None = None, **kwargs):
+      query = self.base_query()
+      query = self.create_filter(query=query, login_user=login_user, filter=kwargs)
+
+      return await paginate(db.session, query, params)
+   
+   async def get_no_page(self, *, login_user: AccessToken | None = None, **kwargs):
+      query = self.base_query()
+      query = self.create_filter(query=query, login_user=login_user, filter=kwargs)
+
+      response = await db.session.execute(query)
+      return response.mappings().all()
+
+   async def get_by_id(self, *, id: str):
+      department = await self.fetch_department(id=id)
+      if not department: return None
+
+      department = DepartmentByIdSch(**department._mapping)
+      department.doc_types = await self.fetch_department_doc_types(department_id=id)
+
+      return department
+
+   async def update_and_mapping_w_doc_type(self, *, obj_current: Department, doc_type_ids: list[str] | None = []):
+      current_department_doc_types = await crud.department_doc_type.get_by_department(department_id=obj_current.id)
+      
+      for doc_type_id in obj_new.doc_type_ids:
+         department_doc_type = await crud.department_doc_type.get_department_doc_type(department_id=obj_current.id, doc_type_id=doc_type_id)
+         if not department_doc_type:
+            doc_type = await crud.doc_type.get(id=doc_type_id)
+            if not doc_type:
+               raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Selected document type not found!")
+            
+            db_obj = DepartmentDocType(doc_type_id=doc_type_id, department_id=obj_current.id)
+            db.session.add(db_obj)
+            await db.session.flush()
+         else:
+            current_department_doc_types.remove(department_doc_type)
+
+      for current_department_doc_type in current_department_doc_types:
+         await db.session.delete(current_department_doc_type)
+
+      await db.session.commit()
 
    async def get_paginated(self, *, params, login_user: AccessToken | None = None, **kwargs):
       query = self.base_query()
@@ -34,27 +78,6 @@ class CRUDDepartment(CRUDBase[Department, DepartmentCreateSch, DepartmentUpdateS
       department.doc_types = await self.fetch_department_doc_types(department_id=id)
 
       return department
-
-   async def update_and_mapping_w_doc_type(self, *, obj_current: Department, doc_type_ids: list[str] | None = []):
-      current_department_doc_types = await crud.department_doc_type.get_by_department(department_id=obj_current.id)
-      
-      for doc_type_id in doc_type_ids:
-         department_doc_type = await crud.department_doc_type.get_department_doc_type(department_id=obj_current.id, doc_type_id=doc_type_id)
-         if not department_doc_type:
-            doc_type = await crud.doc_type.get(id=doc_type_id)
-            if not doc_type:
-               raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Selected document type not found!")
-            
-            db_obj = DepartmentDocType(doc_type_id=doc_type_id, department_id=obj_current.id)
-            db.session.add(db_obj)
-            await db.session.flush()
-         else:
-            current_department_doc_types.remove(department_doc_type)
-
-      for current_department_doc_type in current_department_doc_types:
-         await db.session.delete(current_department_doc_type)
-
-      await db.session.commit()
 
    def base_query(self):
 

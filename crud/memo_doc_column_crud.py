@@ -29,10 +29,10 @@ class CRUDMemoDocColumn(CRUDBase[MemoDocColumn, MemoDocColumnCreateSch, MemoDocC
 
         query = select(
             *MemoDocColumn.__table__.columns,
-            ColumnType.name.label("column_type_name"),
-            ColumnType.data_type,
-            ColumnType.enum_data,
-            ColumnType.is_mandatory
+            ColumnType.name.label("column_name"),
+            ColumnType.data_type.label("column_data_type"),
+            ColumnType.enum_data.label("column_enum_data"),
+            ColumnType.is_mandatory.label("column_is_mandatory")
         )
         query = query.outerjoin(ColumnType, ColumnType.id == MemoDocColumn.column_type_id)
 

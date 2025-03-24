@@ -7,6 +7,7 @@ class DocTypeArchiveCreateSch(DocTypeArchiveBase):
 
 class DocTypeArchiveSch(DocTypeArchiveBase):
     doc_format_name: str | None = None
+    doc_format_code: str | None = None
 
 class DocTypeArchiveUpdateSch(DocTypeArchiveBase):
     id: str | None = None
