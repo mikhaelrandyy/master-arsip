@@ -178,8 +178,8 @@ class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
                 if order == OrderEnumSch.ascendent:
                     query = query.order_by(order_column.asc())
             
-        if login_user and 'superadmin' not in login_user.authorities:
-            query = query.filter(Worker.client_id == login_user.client_id)
+        # if login_user and 'superadmin' not in login_user.authorities:
+        #     query = query.filter(Worker.client_id == login_user.client_id)
         
         return query
 
