@@ -70,7 +70,7 @@ class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
             current_doc_type_archive = await crud.doc_type_archive.get_doc_type_archive(doc_type_id=obj_current.id, doc_format_id=dt.id, jenis_arsip=dt.jenis_arsip)
 
             if not current_doc_type_archive:
-                doc_format = await crud.doc_format.get(id=dt.id)
+                doc_format = await crud.doc_format.get(id=dt.doc_format_id)
                 if not doc_format:
                     raise HTTPException(status_code=404, detail=f"Document format not found!")
 
