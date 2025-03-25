@@ -5,7 +5,7 @@ class DocumentCategoryEnum(str, Enum):
     KELUAR = "KELUAR"
     PINJAM = "PINJAM"
     KEMBALI = "KEMBALI"
-    MASUK_HOLD = "MASUK HOLD"
+    MASUK_HOLD = "MASUK_HOLD"
     HOLD = "HOLD"
     UNHOLD = "UNHOLD"
 
