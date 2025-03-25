@@ -5,7 +5,7 @@ from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy.orm import selectinload, joinedload
 from fastapi_pagination import Params, Page
 from crud.base_crud import CRUDBase
-from sqlmodel import and_, select, cast, String, or_, func
+from sqlmodel import and_, select, cast, String, or_, func, case
 from models import (
     Memo, 
     MemoDoc, 
@@ -17,7 +17,7 @@ from models import (
     Workflow
 )
 from common.generator import generate_code
-from common.enum import CodeCounterEnum
+from common.enum import CodeCounterEnum, WorkflowLastStatusEnum
 from schemas.common_sch import OrderEnumSch
 from schemas.memo_sch import MemoCreateSch, MemoUpdateSch, MemoByIdSch
 from schemas.memo_doc_sch import MemoDocCreateSch, MemoDocUpdateSch, MemoDocSch
@@ -214,20 +214,18 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
     def base_query(self):
 
         query = select(
-                    *Memo.__table__.columns,
-                    Project.code.label('project_code'),
-                    Company.code.label('company_code')
-                )
-
-        # query = select(
-        #             *Memo.__table__.columns,
-        #             Project.code.label('project_code'),
-        #             Company.code.label('company_code'),
-        #             Workflow.last_status.label('last_status')
-        #         )
+                *Memo.__table__.columns,
+                Project.code.label('project_code'),
+                Company.code.label('company_code'),
+                case((Workflow.last_status.in_([WorkflowLastStatusEnum.COMPLETED, WorkflowLastStatusEnum.REJECTED]), Workflow.last_status),
+                else_ = Workflow.step_name).label("workflow_status"),
+            )
         
-        query = query.outerjoin(Project, Project.id == Memo.project_id,
-                            ).outerjoin(Company, Company.id == Memo.company_id)
+        query = query.outerjoin(Project, Project.id == Memo.project_id
+                    ).outerjoin(Company, Company.id == Memo.company_id
+                    ).outerjoin(Workflow, Workflow.id == Memo.workflow_id
+                    ).distinct()
+        
         return query
 
     def create_filter(self, *, query, filter:dict):

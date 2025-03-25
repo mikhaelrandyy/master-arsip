@@ -59,23 +59,8 @@ async def update(id: str, request: Request, sch: DepartmentUpdateSch):
     obj_current = await crud.department.get(id=id)
     if not obj_current:
         raise IdNotFoundException(Department, id)
-
-    obj_updated = await crud.department.update(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
+    obj_updated = await crud.department.update_w_doc_type(obj_current=obj_current, obj_new=sch, updated_by=login_user.client_id)
     response_obj = await crud.department.get_by_id(id=obj_updated.id)
-    return create_response(data=response_obj)
-
-@router.post("/mapping/doc-type/{id}", response_model=PostResponseBaseSch[DepartmentSch], status_code=status.HTTP_201_CREATED)
-async def mapping_department_doc_type(id:str, doc_type_ids: list[str]):
-    
-    """Create a new mapping with doc type"""
-
-    obj_current = await crud.department.get(id=id)
-    if not obj_current:
-        raise IdNotFoundException(Department, id)
-    
-    await crud.department.update_and_mapping_w_doc_type(obj_current=obj_current, doc_type_ids=doc_type_ids)
-    response_obj = await crud.department.get_by_id(id=obj_current.id)
-
     return create_response(data=response_obj)
 
 

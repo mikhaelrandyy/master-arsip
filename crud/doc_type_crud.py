@@ -67,14 +67,21 @@ class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
         current_doc_type_archives = await crud.doc_type_archive.get_by_doc_type(doc_type_id=obj_current.id)
 
         for dt in obj_new.doc_archives:
-            current_doc_type_archive = await crud.doc_type_archive.get_doc_type_archive(doc_type_id=obj_current.id, doc_format_id=dt.doc_format_id, jenis_arsip=dt.jenis_arsip)
+            current_doc_type_archive = await crud.doc_type_archive.get_doc_type_archive(
+                doc_type_id=obj_current.id, 
+                doc_format_id=dt.doc_format_id, 
+                jenis_arsip=dt.jenis_arsip)
 
             if not current_doc_type_archive:
                 doc_format = await crud.doc_format.get(id=dt.doc_format_id)
                 if not doc_format:
                     raise HTTPException(status_code=404, detail=f"Document format not found!")
 
-                db_obj_map_archive = DocTypeArchive(doc_format_id=doc_format.id, doc_type_id=obj_current.id, jenis_arsip=dt.jenis_arsip)
+                db_obj_map_archive = DocTypeArchive(
+                    doc_format_id=doc_format.id, 
+                    doc_type_id=obj_current.id, 
+                    jenis_arsip=dt.jenis_arsip)
+                
                 db.session.add(db_obj_map_archive)
             else:
                 current_doc_type_archives.remove(current_doc_type_archive)
@@ -146,7 +153,8 @@ class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
                     ).outerjoin(count_columns_sq, count_columns_sq.c.id == DocType.id
                     ).outerjoin(DepartmentDocType, DepartmentDocType.doc_type_id == DocType.id
                     ).outerjoin(Worker, Worker.department_id == DepartmentDocType.department_id
-                    ).outerjoin(DocTypeArchive, DocTypeArchive.doc_type_id == DocType.id)
+                    ).outerjoin(DocTypeArchive, DocTypeArchive.doc_type_id == DocType.id
+                    ).outerjoin
         
         query = query.distinct()
 
@@ -178,8 +186,8 @@ class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
                 if order == OrderEnumSch.ascendent:
                     query = query.order_by(order_column.asc())
             
-        if login_user and 'superadmin' not in login_user.authorities:
-            query = query.filter(Worker.client_id == login_user.client_id)
+        # if login_user and 'superadmin' not in login_user.authorities:
+        #     query = query.filter(Worker.client_id == login_user.client_id)
         
         return query
 
