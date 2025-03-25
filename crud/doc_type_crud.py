@@ -153,8 +153,7 @@ class CRUDDocType(CRUDBase[DocType, DocTypeCreateSch, DocTypeUpdateSch]):
                     ).outerjoin(count_columns_sq, count_columns_sq.c.id == DocType.id
                     ).outerjoin(DepartmentDocType, DepartmentDocType.doc_type_id == DocType.id
                     ).outerjoin(Worker, Worker.department_id == DepartmentDocType.department_id
-                    ).outerjoin(DocTypeArchive, DocTypeArchive.doc_type_id == DocType.id
-                    ).outerjoin
+                    ).outerjoin(DocTypeArchive, DocTypeArchive.doc_type_id == DocType.id)
         
         query = query.distinct()
 
