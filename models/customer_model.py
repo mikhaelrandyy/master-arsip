@@ -1,6 +1,6 @@
 from sqlmodel import Field
 from models.base_model import BaseULIDModel, SQLModel
-from common.enum import CustomerDevEnum, JenisIdentitasEnum, ReligionEnum, GenderEnum, MaritalStatusEnum, AddressEnum
+from common.enum_customer import CustomerDevEnum, JenisIdentitasEnum, ReligionEnum, GenderEnum, MaritalStatusEnum, AddressEnum
 from datetime import date
 from pydantic import EmailStr
 
