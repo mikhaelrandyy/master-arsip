@@ -63,6 +63,8 @@ class CRUDDepartment(CRUDBase[Department, DepartmentCreateSch, DepartmentUpdateS
 
       await db.session.commit()
 
+      return obj_current
+
    async def get_paginated(self, *, params, login_user: AccessToken | None = None, **kwargs):
       query = self.base_query()
       query = self.create_filter(query=query, login_user=login_user, filter=kwargs)
