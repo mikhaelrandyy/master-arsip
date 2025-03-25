@@ -13,7 +13,8 @@ from models import (
     MemoDocAsalHak,
     MemoDocAttachment, 
     Project, 
-    Company
+    Company,
+    Workflow
 )
 from common.generator import generate_code
 from common.enum import CodeCounterEnum
@@ -217,6 +218,13 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
                     Project.code.label('project_code'),
                     Company.code.label('company_code')
                 )
+
+        # query = select(
+        #             *Memo.__table__.columns,
+        #             Project.code.label('project_code'),
+        #             Company.code.label('company_code'),
+        #             Workflow.last_status.label('last_status')
+        #         )
         
         query = query.outerjoin(Project, Project.id == Memo.project_id,
                             ).outerjoin(Company, Company.id == Memo.company_id)

@@ -13,36 +13,30 @@ from schemas.oauth import AccessToken
 import crud
 
 class CRUDDepartment(CRUDBase[Department, DepartmentCreateSch, DepartmentUpdateSch]):
-   async def create_w_doc_type(self, *, obj_in: DepartmentCreateSch, created_by: str):
-      db_obj = Department(**obj_in.model_dump())
-      if created_by:
-            db_obj.created_by = db_obj.updated_by = created_by
 
-      db.session.add(db_obj)
-      await db.session.flush()
+   async def get_paginated(self, *, params, login_user: AccessToken | None = None, **kwargs):
+      query = self.base_query()
+      query = self.create_filter(query=query, login_user=login_user, filter=kwargs)
 
-      for obj in obj_in.doc_type_ids:
-         db_obj_map = DepartmentDocType(doc_type_id=obj, department_id=db_obj.id)
-         db.session.add(db_obj_map)
-
-      await db.session.commit()
-      await db.session.refresh(db_obj)
-
-      return db_obj
+      return await paginate(db.session, query, params)
    
-   async def update_w_doc_type(self, *, obj_current: Department, obj_new: DepartmentUpdateSch, updated_by: str):
-      obj_data = jsonable_encoder(obj_current)
-      update_data = obj_new if isinstance(obj_new, dict) else obj_new.dict(exclude_unset=True)
+   async def get_no_page(self, *, login_user: AccessToken | None = None, **kwargs):
+      query = self.base_query()
+      query = self.create_filter(query=query, login_user=login_user, filter=kwargs)
 
-      for field in obj_data:
-         if field in update_data:
-               setattr(obj_current, field, update_data[field])
-         elif updated_by and updated_by != "" and field == "updated_by":
-               setattr(obj_current, field, updated_by)
+      response = await db.session.execute(query)
+      return response.mappings().all()
 
-      db.session.add(obj_current)
-      await db.session.flush()
-      
+   async def get_by_id(self, *, id: str):
+      department = await self.fetch_department(id=id)
+      if not department: return None
+
+      department = DepartmentByIdSch(**department._mapping)
+      department.doc_types = await self.fetch_department_doc_types(department_id=id)
+
+      return department
+
+   async def update_and_mapping_w_doc_type(self, *, obj_current: Department, doc_type_ids: list[str] | None = []):
       current_department_doc_types = await crud.department_doc_type.get_by_department(department_id=obj_current.id)
       
       for doc_type_id in obj_new.doc_type_ids:
