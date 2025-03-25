@@ -9,5 +9,3 @@ class HelperService:
         trans_at = trans_at.replace(tzinfo=None)
         return trans_at
 
-
-            
