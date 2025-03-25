@@ -1,6 +1,6 @@
 from sqlmodel import SQLModel, Field, Relationship
 from common.enum import WorkflowLastStatusEnum, WorkflowEntityEnum
-from models.base_model import BaseFieldULIDModel
+from models.base_model import BaseULIDModel
 from datetime import datetime
 from pydantic import EmailStr
 
@@ -19,7 +19,7 @@ class WorkflowBase(SQLModel):
     flow_id: str | None = Field(nullable=False)
     version: int | None = Field(default=1)
 
-class WorkflowFullBase(BaseFieldULIDModel, WorkflowBase):
+class WorkflowFullBase(BaseULIDModel, WorkflowBase):
     pass
 
 class Workflow(WorkflowFullBase, table=True):
@@ -31,7 +31,7 @@ class WorkflowNextApproverBase(SQLModel):
     email: EmailStr | None = Field(nullable=True)
     name: str | None = Field(nullable=True)
 
-class WorkflowNextApproverFullBase(BaseFieldULIDModel, WorkflowNextApproverBase):
+class WorkflowNextApproverFullBase(BaseULIDModel, WorkflowNextApproverBase):
     pass
 
 class WorkflowNextApprover(WorkflowNextApproverFullBase, table=True):
@@ -49,7 +49,7 @@ class WorkflowHistoryBase(SQLModel):
     last_step_app_action_at: datetime | None = Field(nullable=True)
     last_step_app_action_remarks: str | None = Field(nullable=True)
 
-class WorkflowHistoryFullBase(BaseFieldULIDModel, WorkflowHistoryBase):
+class WorkflowHistoryFullBase(BaseULIDModel, WorkflowHistoryBase):
     pass
 
 class WorkflowHistory(WorkflowHistoryFullBase, table=True):
@@ -60,7 +60,7 @@ class WorkflowTemplateBase(SQLModel):
     entity: WorkflowEntityEnum | None
     flow_id: str | None
 
-class WorkflowTemplateFullBase(WorkflowTemplateBase, BaseFieldULIDModel):
+class WorkflowTemplateFullBase(WorkflowTemplateBase, BaseULIDModel):
     pass
 
 class WorkflowTemplate(WorkflowTemplateFullBase, table=True):

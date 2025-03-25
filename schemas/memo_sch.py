@@ -14,7 +14,7 @@ class MemoUpdateSch(MemoBase):
 class MemoByIdSch(MemoFullBase):
     project_code: str | None
     company_code: str | None
-    last_status: str | None = None
+    # last_status: str | None = None
     memo_docs: list[MemoDocSch] | None = []
 
 

@@ -216,13 +216,18 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
         query = select(
                     *Memo.__table__.columns,
                     Project.code.label('project_code'),
-                    Company.code.label('company_code'),
-                    Workflow.last_status.label('last_status')
+                    Company.code.label('company_code')
                 )
+
+        # query = select(
+        #             *Memo.__table__.columns,
+        #             Project.code.label('project_code'),
+        #             Company.code.label('company_code'),
+        #             Workflow.last_status.label('last_status')
+        #         )
         
         query = query.outerjoin(Project, Project.id == Memo.project_id,
-                            ).outerjoin(Company, Company.id == Memo.company_id,
-                            ).outerjoin(Workflow, Workflow.id == Memo.workflow_id)
+                            ).outerjoin(Company, Company.id == Memo.company_id)
         return query
 
     def create_filter(self, *, query, filter:dict):
