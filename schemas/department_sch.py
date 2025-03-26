@@ -1,5 +1,5 @@
 from models.department_model import DepartmentBase, DepartmentFullBase
-from schemas.doc_type_sch import DocTypeSch
+from schemas.department_doc_type_sch import DepartmentDocTypeSch
 from sqlmodel import SQLModel
 
 
@@ -14,6 +14,6 @@ class DepartmentUpdateSch(DepartmentBase):
     doc_type_ids: list[str] | None = None
 
 class DepartmentByIdSch(DepartmentSch):
-     doc_types: list[DocTypeSch] | None = None
+     doc_types: list[DepartmentDocTypeSch] | None = None
 
 

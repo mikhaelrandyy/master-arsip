@@ -2,7 +2,7 @@ from fastapi_async_sqlalchemy import db
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import and_, select
 from crud.base_crud import CRUDBase
-from models import DepartmentDocType, DocType, Department
+from models import DepartmentDocType, DocType, Department, DocTypeGroup
 from schemas.department_doc_type_sch import DepartmentDocTypeCreateSch, DepartmentDocTypeUpdateSch
 
 
@@ -26,10 +26,13 @@ class CRUDDepartmentDocType(CRUDBase[DepartmentDocType, DepartmentDocTypeCreateS
         query = select(
             *DepartmentDocType.__table__.columns,
             Department.name.label('department_name'),
-            DocType.name.label('doc_type_name')
+            DocType.name.label('doc_type_name'),
+            DocType.code.label('doc_type_code'),
+            DocTypeGroup.name.label('doc_type_group_name')
         )
         query = query.join(Department, Department.id == DepartmentDocType.department_id
-                    ).join(DocType, DocType.id == DepartmentDocType.doc_type_id)
+                    ).join(DocType, DocType.id == DepartmentDocType.doc_type_id
+                    ).join(DocTypeGroup, DocTypeGroup.id == DocType.doc_type_group_id)
         
         query = query.distinct()
 

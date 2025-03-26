@@ -143,7 +143,7 @@ class CRUDDepartment(CRUDBase[Department, DepartmentCreateSch, DepartmentUpdateS
       if not dept_doc_types: return []
 
       department_doc_types = []
-      for dept_doc_type in department_doc_types:
+      for dept_doc_type in dept_doc_types:
          dept_doc_typ = DepartmentDocTypeSch(**dept_doc_type)
          department_doc_types.append(dept_doc_typ)
 
