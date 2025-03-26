@@ -6,7 +6,7 @@ from .column_type_crud import column_type
 from .alashak_crud import alashak
 from .department_crud import department
 from .doc_type_column_crud import doc_type_column
-# from .doc_archive_crud import doc_archive
+from .doc_archive_crud import doc_archive
 from .code_counter_crud import code_counter
 from .department_doc_type_crud import department_doc_type
 from .worker_crud import worker

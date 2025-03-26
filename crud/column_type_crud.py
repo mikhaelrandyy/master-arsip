@@ -8,7 +8,7 @@ from models import ColumnType
 from schemas.common_sch import OrderEnumSch
 from schemas.column_type_sch import ColumnTypeCreateSch, ColumnTypeUpdateSch
 from common.enum import DataTypeEnum
-
+import crud
 
 class CRUDColumnType(CRUDBase[ColumnType, ColumnTypeCreateSch, ColumnTypeUpdateSch]):
     async def get_by_id(self, *, id:str) -> ColumnType:
@@ -73,5 +73,6 @@ class CRUDColumnType(CRUDBase[ColumnType, ColumnTypeCreateSch, ColumnTypeUpdateS
                   query = query.order_by(order_column.asc())
       
       return query
+    
      
 column_type = CRUDColumnType(ColumnType)
