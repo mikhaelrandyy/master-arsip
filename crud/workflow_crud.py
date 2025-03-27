@@ -59,6 +59,10 @@ class CRUDWorkflow(CRUDBase[Workflow, WorkflowCreateSch, WorkflowUpdateSch]):
 
         await self.create_history(sch=sch, obj_updated=obj_updated, request=request)
 
+        if obj_updated.entity == WorkflowEntityEnum.MEMO and obj_updated.last_status == WorkflowLastStatusEnum.COMPLETED:
+            url = f'{request.base_url}arsip/memo/task'
+            GCloudTaskService().create_task(payload={"id":str(obj_updated.reference_id)}, base_url=url)
+
 
     async def create_next_approver(self, sch:WorkflowSystemCallbackSch, obj_updated:Workflow):
 
@@ -84,8 +88,6 @@ class CRUDWorkflow(CRUDBase[Workflow, WorkflowCreateSch, WorkflowUpdateSch]):
 
         await crud.workflow_history.create(obj_in=obj_in)
 
-        if obj_updated.entity == WorkflowEntityEnum.MEMO and obj_updated.last_status == WorkflowLastStatusEnum.COMPLETED:
-            url = f'{request.base_url}arsip/memo/task'
-            GCloudTaskService().create_task(payload={"id":str(obj_updated.reference_id)}, base_url=url)
+        
     
 workflow = CRUDWorkflow(Workflow)
