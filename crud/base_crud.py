@@ -36,6 +36,22 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         query = select(self.model).where(self.model.id == id)
         response = await db_session.execute(query)
         return response.scalar_one_or_none()
+    
+    async def get_by_code_upper(
+        self, *, code: str | None = None, db_session: AsyncSession | None = None
+    ) -> ModelType | None:
+        db_session = db_session or db.session
+        query = select(self.model).where(func.upper(self.model.code) == code.upper())
+        response = await db_session.execute(query)
+        return response.scalar_one_or_none()
+    
+    async def get_by_name_upper(
+        self, *, name: str | None = None, db_session: AsyncSession | None = None
+    ) -> ModelType | None:
+        db_session = db_session or db.session
+        query = select(self.model).where(func.upper(self.model.name) == name.upper())
+        response = await db_session.execute(query)
+        return response.scalar_one_or_none()
 
     async def get_by_ids(
         self,

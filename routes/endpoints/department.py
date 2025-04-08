@@ -48,6 +48,15 @@ async def create(request: Request, sch: DepartmentCreateSch):
     
     """Create a new object"""
     login_user: AccessToken = request.state.login_user
+
+    obj_code_exists = await crud.department.get_by_code_upper(code=sch.code)
+    if obj_code_exists:
+        raise HTTPException(status_code=400, detail="Department dengan code yang sama sudah eksis")
+    
+    obj_name_exists = await crud.department.get_by_name_upper(name=sch.name)
+    if obj_name_exists:
+        raise HTTPException(status_code=400, detail="Department dengan nama yang sama sudah eksis")
+
     obj = await crud.department.create_w_doc_type(obj_in=sch, created_by=login_user.client_id)
     response_obj = await crud.department.get_by_id(id=obj.id)
     return create_response(data=response_obj)
@@ -56,6 +65,15 @@ async def create(request: Request, sch: DepartmentCreateSch):
 async def update(id: str, request: Request, sch: DepartmentUpdateSch):
     
     login_user:AccessToken = request.state.login_user
+
+    obj_code_exists = await crud.department.get_by_code_upper(code=sch.code)
+    if obj_code_exists and obj_code_exists.id != id:
+        raise HTTPException(status_code=400, detail="Department dengan code yang sama sudah eksis")
+    
+    obj_name_exists = await crud.department.get_by_name_upper(name=sch.name)
+    if obj_name_exists and obj_name_exists.id != id:
+        raise HTTPException(status_code=400, detail="Department dengan nama yang sama sudah eksis")
+    
     obj_current = await crud.department.get(id=id)
     if not obj_current:
         raise IdNotFoundException(Department, id)

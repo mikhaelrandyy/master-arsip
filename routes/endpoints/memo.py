@@ -20,8 +20,8 @@ async def get_list(
     order: OrderEnumSch | None = OrderEnumSch.descendent,
     params: Params=Depends()):
 
-    # login_user: AccessToken = request.state.login_user
-    objs = await crud.memo.get_paginated(search=search, order_by=order_by, order=order, params=params)
+    login_user: AccessToken = request.state.login_user
+    objs = await crud.memo.get_paginated(login_user=login_user, search=search, order_by=order_by, order=order, params=params)
     return create_response(data=objs)
 
 @router.get("/no-page", response_model=GetResponseBaseSch[list[MemoSch]])

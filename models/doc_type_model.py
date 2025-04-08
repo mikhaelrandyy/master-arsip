@@ -1,6 +1,7 @@
 from models.base_model import BaseULIDModel
 from sqlmodel import SQLModel, Field, Relationship
 from typing import TYPE_CHECKING
+from pydantic import field_validator
 from models.doc_type_archive_model import DocTypeArchive
 from models.doc_type_column_model import DocTypeColumn
 from common.enum import GroupingDocumentEnum
@@ -10,12 +11,20 @@ if TYPE_CHECKING:
 
 class DocTypeBase(SQLModel):
     code: str | None = Field(nullable=True, default=None, unique=True)
-    name: str | None = Field(nullable=True)
+    name: str | None = Field(nullable=False, unique=True)
     doc_type_group_id: str | None = Field(nullable=True, foreign_key="doc_type_group.id")
     grouping_code: GroupingDocumentEnum | None = Field(nullable=True)
     is_doc_asal: bool = Field(nullable=False, default=False)
     is_multiple: bool = Field(nullable=False, default=False)
     is_active: bool = Field(nullable=False, default=True)
+
+    @field_validator('code')
+    def validate_code(cls, value):
+        return value.upper()
+    
+    @field_validator('name')
+    def validate_name(cls, value):
+        return value.upper()
 
 class DocTypeFullBase(BaseULIDModel, DocTypeBase):
     pass

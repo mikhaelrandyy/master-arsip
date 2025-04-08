@@ -55,17 +55,35 @@ async def create(request: Request, sch: DocTypeCreateSch):
     """Create a new object"""
 
     login_user : AccessToken = request.state.login_user
+
+    obj_code_exists = await crud.doc_type.get_by_code_upper(code=sch.code)
+    if obj_code_exists:
+        raise HTTPException(status_code=400, detail="Document Type dengan code yang sama sudah eksis")
+    
+    obj_name_exists = await crud.doc_type.get_by_name_upper(name=sch.name)
+    if obj_name_exists:
+        raise HTTPException(status_code=400, detail="Document Type dengan nama yang sama sudah eksis")
+
     obj = await crud.doc_type.create_and_mapping_w_doc_format_column(sch=sch, created_by=login_user.client_id)
     response_obj = await crud.doc_type.get_by_id(id=obj.id)
     return create_response(data=response_obj)
 
 @router.put("/{id}", response_model=PostResponseBaseSch[DocTypeSch], status_code=status.HTTP_201_CREATED)
-async def update(request: Request, id: str, obj_new: DocTypeUpdateSch):
+async def update(request: Request, id: str, sch: DocTypeUpdateSch):
     
     login_user : AccessToken = request.state.login_user
+
+    obj_code_exists = await crud.doc_type.get_by_code_upper(code=sch.code)
+    if obj_code_exists and obj_code_exists.id != id:
+        raise HTTPException(status_code=400, detail="Document Type dengan code yang sama sudah eksis")
+    
+    obj_name_exists = await crud.doc_type.get_by_name_upper(name=sch.name)
+    if obj_name_exists and obj_name_exists.id != id:
+        raise HTTPException(status_code=400, detail="Document Type dengan nama yang sama sudah eksis")
+
     obj_current = await crud.doc_type.get(id=id)
     if not obj_current:
         raise HTTPException(status_code=404, detail=f"Document Type tidak ditemukan")
-    obj_updated = await crud.doc_type.update_and_mapping_w_doc_format_column(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
+    obj_updated = await crud.doc_type.update_and_mapping_w_doc_format_column(obj_current=obj_current, obj_new=sch, updated_by=login_user.client_id)
     response_obj = await crud.doc_type.get_by_id(id=obj_updated.id)
     return create_response(data=response_obj)

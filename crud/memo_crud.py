@@ -14,7 +14,8 @@ from models import (
     MemoDocAttachment, 
     Project, 
     Company,
-    Workflow
+    Workflow,
+    Worker
 )
 from common.generator import generate_code
 from common.enum import CodeCounterEnum, WorkflowLastStatusEnum
@@ -32,7 +33,6 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
     async def create(self, *, memo:MemoCreateSch, created_by:str) -> Memo:
 
         memo.code = await generate_code(entity=CodeCounterEnum.MEMO)
-
         db_obj = Memo.model_validate(memo)
 
         if created_by:
@@ -198,9 +198,9 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
         
         return memo
      
-    async def get_paginated(self, *, params: Params | None = Params(), **kwargs):
+    async def get_paginated(self, *, params: Params | None = Params(), login_user: AccessToken | None = None, **kwargs):
         query = self.base_query()
-        query = self.create_filter(query=query, filter=kwargs)
+        query = self.create_filter(login_user=login_user, query=query, filter=kwargs)
 
         return await paginate(db.session, query, params)
     
@@ -224,11 +224,12 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
         query = query.outerjoin(Project, Project.id == Memo.project_id
                     ).outerjoin(Company, Company.id == Memo.company_id
                     ).outerjoin(Workflow, Workflow.id == Memo.workflow_id
+                    ).outerjoin(Worker, Worker.id == Memo.created_by
                     ).distinct()
         
         return query
 
-    def create_filter(self, *, query, filter:dict):
+    def create_filter(self, *, login_user: AccessToken | None = None, query, filter:dict):
         if filter.get("search"):
             search = filter.get("search")
             query = query.filter(
@@ -248,6 +249,9 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
                   query = query.order_by(order_column.desc())
                 if order == OrderEnumSch.ascendent:
                   query = query.order_by(order_column.asc())
+
+        if login_user and login_user.authorities and 'superadmin' not in login_user.authorities:
+            query = query.filter(Memo.created_by == login_user.client_id)
 
         return query
     
