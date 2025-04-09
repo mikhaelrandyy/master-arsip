@@ -8,25 +8,15 @@ from schemas.workflow_next_approver_sch import WorkflowNextApproverCreateSch, Wo
 from uuid import UUID
 
 class CRUDWorkflowNextApprover(CRUDBase[WorkflowNextApprover, WorkflowNextApproverCreateSch, WorkflowNextApproverUpdateSch]):
-    async def delete_by_workflow_id(
-            self, 
-            *, 
-            workflow_id:UUID,
-            query: WorkflowNextApprover | None = None,
-            db_session : AsyncSession | None = None,
-            with_commit:bool | None = True
-            ) -> bool:
-        
-        db_session = db_session or db.session
-        if query is None:
-            query = self.model.__table__.delete().where(self.model.workflow_id == workflow_id)
+    async def delete_by_workflow_id(self, *, workflow_id:UUID, with_commit:bool | None = True) -> bool:
+        query = self.model.__table__.delete().where(self.model.workflow_id == workflow_id)
 
         try:
-            await db_session.execute(query)
+            await db.session.execute(query)
             if with_commit:
-                await db_session.commit()
+                await db.session.commit()
         except exc.IntegrityError:
-            db_session.rollback()
+            db.session.rollback()
             raise HTTPException(status_code=422, detail="failed delete data")
 
         return True

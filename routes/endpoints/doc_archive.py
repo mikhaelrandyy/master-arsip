@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, HTTPException, Request, Depends
+from fastapi import APIRouter, status, HTTPException, Request, Depends, Body
 import crud.doc_archive_crud
 from schemas.doc_archive_sch import DocArchiveSch
 from schemas.response_sch import (PostResponseBaseSch, GetResponseBaseSch, GetResponsePaginatedSch, create_response)
@@ -14,6 +14,12 @@ async def create(memo_id: str):
         # login_user=request.state.login_user
     obj = await crud.doc_archive.create_doc_archive(memo_id=memo_id)
     return create_response(data=obj)
+
+@router.post("/task/notif-from-memo")
+async def notif_from_memo(request: dict = Body(..., example={"memo_id": "string"})):
+    """Receive notification from memo"""
+    await crud.doc_archive.notif_from_memo(request)
+    return create_response({"MESSAGE" : "SUCCESSFULLY"})
 
 
 

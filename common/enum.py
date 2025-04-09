@@ -29,6 +29,7 @@ class NecessityEnum(str, Enum):
     PERPANJANGAN = "PERPANJANGAN"
     REVISI = "REVISI"
     PEMISAHAN = "PEMISAHAN"
+    TRANSFER = "TRANSFER"
 
 class GroupingDocumentEnum(str, Enum):
     DATA_UTAMA = "DATA_UTAMA"
@@ -75,11 +76,11 @@ class OutgoingToTypeEnum(str, Enum):
 class OutgoingToDocTypeEnum(str, Enum):
     ASLI = "ASLI"
     COPY = "COPY"
-    TRANSFER = "TRANSFER"
 
 class StatusDocArchiveEnum(str, Enum):
     AVAILABLE = "AVAILABLE"
     UNAVAILABLE = "UNAVAILABLE"
+    AVAILABLE_HOLD = "AVAILABLE_HOLD"
 
 class WorkflowEntityEnum(str, Enum):
     MEMO = "MEMO"

@@ -17,6 +17,13 @@ class CRUDMemoDocAsalHak(CRUDBase[MemoDocAsalHak, MemoDocAsalHakCreateSch, MemoD
         response = await db.session.execute(query)
         return response.scalars().all()
     
+    async def get_by_memo_doc(self, *, memo_doc_id:str) -> list[MemoDocAsalHak]:
+
+        query = select(MemoDocAsalHak).where(MemoDocAsalHak.memo_doc_id == memo_doc_id)
+        
+        response = await db.session.execute(query)
+        return response.scalars().all()
+    
     async def fetch_by_memo_doc(self, **kwargs):
         query = self.base_query()
         query = self.create_filter(query=query, filter=kwargs)

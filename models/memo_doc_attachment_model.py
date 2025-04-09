@@ -10,6 +10,7 @@ class MemoDocAttachmentBase(SQLModel):
     file_name: str | None = Field(nullable=True)
     file_url: str | None = Field(nullable=True)
 
+
 class MemoDocAttachmentFullBase(BaseULIDModel, MemoDocAttachmentBase):
     pass
 

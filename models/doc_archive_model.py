@@ -23,6 +23,7 @@ class DocArchiveBase(SQLModel):
     remarks: str | None = Field(nullable=True)
     jenis_arsip: JenisArsipEnum = Field(nullable=False)
     status: StatusDocArchiveEnum | None = Field(nullable=True)
+    is_transfer: bool | None = Field(nullable=True, default=False)
     
 class DocArchiveFullBase(BaseULIDModel, DocArchiveBase):
     pass
