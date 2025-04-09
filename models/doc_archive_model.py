@@ -1,12 +1,7 @@
 from models.base_model import BaseULIDModel
-from sqlmodel import SQLModel, Field, Relationship
-from models.doc_archive_column_model import DocArchiveColumn
-from typing import TYPE_CHECKING
+from sqlmodel import SQLModel, Field
 from common.enum import PhysicalDocTypeEnum, JenisArsipEnum, StatusDocArchiveEnum
 
-
-if TYPE_CHECKING:
-    from models import DocType
 
 class DocArchiveBase(SQLModel):
     doc_type_id: str | None = Field(nullable=True, foreign_key='doc_type.id')
@@ -24,6 +19,7 @@ class DocArchiveBase(SQLModel):
     jenis_arsip: JenisArsipEnum = Field(nullable=False)
     status: StatusDocArchiveEnum | None = Field(nullable=True)
     is_transfer: bool | None = Field(nullable=True, default=False)
+    safe_location: str | None = Field(nullable=True)
     
 class DocArchiveFullBase(BaseULIDModel, DocArchiveBase):
     pass

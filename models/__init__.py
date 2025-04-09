@@ -28,5 +28,6 @@ from .doc_archive_model import DocArchive
 from .doc_archive_column_model import DocArchiveColumn
 from .doc_archive_asal_hak_model import DocArchiveAsalHak
 from .doc_archive_attachment_model import DocArchiveAttachment
+from .doc_archive_history_model import DocArchiveHistory
 
 from .workflow_model import Workflow, WorkflowHistory, WorkflowTemplate, WorkflowNextApprover

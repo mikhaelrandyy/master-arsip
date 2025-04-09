@@ -18,10 +18,11 @@ from .vendor_crud import vendor
 from .worker_crud import worker
 
 # TRANSACTION
+from .doc_archive_crud import doc_archive
 from .doc_archive_asal_hak_crud import doc_archive_asal_hak
 from .doc_archive_attachment_crud import doc_archive_attachment
 from .doc_archive_column_crud import doc_archive_column
-from .doc_archive_crud import doc_archive
+from .doc_archive_history_crud import doc_archive_history
 from .memo_crud import memo
 from .memo_doc_crud import memo_doc
 from .memo_doc_column_crud import memo_doc_column
