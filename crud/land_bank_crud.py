@@ -7,7 +7,6 @@ from models.land_bank_model import LandBank
 from schemas.land_bank_sch import LandBankCreateSch, LandBankUpdateSch
 from schemas.common_sch import OrderEnumSch
 from schemas.oauth import AccessToken
-from common.generator import generate_land_id
 from common.enum import CodeCounterEnum
 import crud
 
