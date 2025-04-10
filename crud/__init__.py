@@ -12,10 +12,12 @@ from .doc_type_column_crud import doc_type_column
 from .doc_type_crud import doc_type
 from .doc_type_group_crud import doc_type_group
 from .project_crud import project
+from .desa_crud import desa
 from .role_crud import role
 from .unit_crud import unit
 from .vendor_crud import vendor
 from .worker_crud import worker
+from .land_bank_crud import land_bank
 
 # TRANSACTION
 from .doc_archive_crud import doc_archive
@@ -23,6 +25,7 @@ from .doc_archive_asal_hak_crud import doc_archive_asal_hak
 from .doc_archive_attachment_crud import doc_archive_attachment
 from .doc_archive_column_crud import doc_archive_column
 from .doc_archive_history_crud import doc_archive_history
+
 from .memo_crud import memo
 from .memo_doc_crud import memo_doc
 from .memo_doc_column_crud import memo_doc_column

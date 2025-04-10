@@ -20,6 +20,7 @@ class DocArchiveBase(SQLModel):
     status: StatusDocArchiveEnum | None = Field(nullable=True)
     is_transfer: bool | None = Field(nullable=True, default=False)
     safe_location: str | None = Field(nullable=True)
+    land_bank_id: str | None = Field(nullable=True, foreign_key='land_bank.id')
     
 class DocArchiveFullBase(BaseULIDModel, DocArchiveBase):
     pass

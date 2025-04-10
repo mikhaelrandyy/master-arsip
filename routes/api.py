@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from configs.permission import Permission
-from routes.endpoints import department, doc_format, doc_type, doc_type_group, column_type, alashak, worker, role, project, memo, company, workflow
+from routes.endpoints import department, doc_format, doc_type, doc_type_group, column_type, alashak, worker, role, project, desa, memo, company, workflow, land_bank
 
 api_router = APIRouter(dependencies=[Depends(Permission().get_login_user)])
 
@@ -13,7 +13,9 @@ api_router.include_router(doc_format.router, prefix="/doc-format", tags=["DOC FO
 api_router.include_router(doc_type.router, prefix="/doc-type", tags=["DOC TYPE"])
 api_router.include_router(doc_type_group.router, prefix="/doc-type-group", tags=["DOC TYPE GROUP"])
 api_router.include_router(memo.router, prefix="/memo", tags=["MEMO"])
+api_router.include_router(land_bank.router, prefix="/land-bank", tags=["LAND BANK"])
 api_router.include_router(project.router, prefix="/project", tags=["PROJECT"])
+api_router.include_router(desa.router, prefix="/desa", tags=["DESA"])
 api_router.include_router(role.router, prefix="/role", tags=["ROLE"])
 api_router.include_router(worker.router, prefix="/worker", tags=["WORKER"])
 api_router.include_router(workflow.router, prefix="/workflow", tags=["WORKFLOW"])

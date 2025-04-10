@@ -10,9 +10,9 @@ from common.enum import WorkflowLastStatusEnum
 
 
 class CRUDDocArchiveHistory(CRUDBase[DocArchiveHistory, DocArchiveHistoryCreateSch, DocArchiveHistoryUpdateSch]):    
-    async def fetch_doc_archive_history(self, id:str):
+    async def fetch_history_by_doc_archive(self, doc_archive_id:str):
             query = self.base_query()
-            query = query.where(DocArchiveHistory.id == id)
+            query = query.where(DocArchiveHistory.doc_archive_id == doc_archive_id)
 
             response = await db.session.execute(query)
             return response.one_or_none()

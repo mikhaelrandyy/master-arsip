@@ -17,6 +17,8 @@ from .vendor_model import Vendor
 from .unit_model import Unit
 from .customer_model import Customer
 from .company_model import Company
+from .desa_model import Desa
+from .land_bank_model import LandBank
 
 from .memo_model import Memo
 from .memo_doc_model import MemoDoc
