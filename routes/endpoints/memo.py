@@ -53,15 +53,35 @@ async def create(request: Request, sch: MemoCreateSch):
 
 @router.put("/{id}", response_model=PostResponseBaseSch[MemoSch], status_code=status.HTTP_201_CREATED)
 async def update(id: str, request: Request, obj_new: MemoUpdateSch):
-    
-    if hasattr(request.state, 'login_user'):
-        login_user = request.state.login_user
+    """Update a object"""
+    login_user: AccessToken = request.state.login_user
+
     obj_current = await crud.memo.get(id=id)
     if not obj_current:
         raise HTTPException(status_code=404, detail=f"Memo tidak ditemukan")
+    
     obj_updated = await crud.memo.update(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
     response_obj = await crud.memo.get_by_id(id=obj_updated.id)
     return create_response(data=response_obj)
+
+@router.post("", response_model=PostResponseBaseSch[MemoSch], status_code=status.HTTP_201_CREATED)
+async def submit(request: Request, id: str):
+    
+    """Create a new object"""
+    login_user: AccessToken = request.state.login_user
+
+    obj_current = await crud.memo.get(id=id)
+    if not obj_current:
+        raise HTTPException(status_code=404, detail=f"Memo tidak ditemukan!")
+    
+    if obj_current.created_by != login_user.client_id:
+        raise HTTPException(status_code=400, detail="Anda tidak memiliki hak untuk SUBMIT memo ini!")
+
+    obj = await crud.memo.submit(obj_current=obj_current)
+    response_obj = await crud.memo.get_by_id(id=obj.id)
+    return create_response(data=response_obj)
+
+
 
 
 

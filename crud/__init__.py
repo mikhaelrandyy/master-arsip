@@ -36,3 +36,4 @@ from .memo_doc_asal_hak_crud import memo_doc_asal_hak
 from .workflow_crud import workflow
 from .workflow_next_approver_crud import workflow_next_approver
 from .workflow_history_crud import workflow_history
+from .workflow_template_crud import workflow_template
