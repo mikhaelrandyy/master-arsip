@@ -15,11 +15,6 @@ import crud
 class CRUDLandBank(CRUDBase[LandBank, LandBankCreateSch, LandBankUpdateSch]):
    async def create_land_bank(self, *, sch:LandBankCreateSch, created_by:str) -> LandBank:
         
-        project = await crud.project.get(id=sch.project_id)
-        desa = await crud.desa.get(id=sch.desa_id)
-        
-        sch.land_id = await generate_land_id(entity=CodeCounterEnum.LAND_BANK, project_name=project.name, desa_code=desa.code)
-
         db_obj = LandBank(**sch.model_dump())
 
         if created_by:

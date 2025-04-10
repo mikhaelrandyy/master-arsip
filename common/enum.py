@@ -57,7 +57,6 @@ class CodeCounterEnum(str, Enum):
     DOC_TYPE = "CJD"
     DOC_TYPE_GROUP = "GJD"
     MEMO = "ASG"
-    LAND_BANK =  "LAND_BANK"
 
 
 class PhysicalDocTypeEnum(str, Enum):
