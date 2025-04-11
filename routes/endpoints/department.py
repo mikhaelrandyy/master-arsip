@@ -77,6 +77,7 @@ async def update(id: str, request: Request, sch: DepartmentUpdateSch):
     obj_current = await crud.department.get(id=id)
     if not obj_current:
         raise IdNotFoundException(Department, id)
+    
     obj_updated = await crud.department.update_w_doc_type(obj_current=obj_current, obj_new=sch, updated_by=login_user.client_id)
     response_obj = await crud.department.get_by_id(id=obj_updated.id)
     return create_response(data=response_obj)

@@ -32,7 +32,7 @@ class CRUDDepartmentDocType(CRUDBase[DepartmentDocType, DepartmentDocTypeCreateS
         )
         query = query.join(Department, Department.id == DepartmentDocType.department_id
                     ).join(DocType, DocType.id == DepartmentDocType.doc_type_id
-                    ).join(DocTypeGroup, DocTypeGroup.id == DocType.doc_type_group_id)
+                    ).outerjoin(DocTypeGroup, DocTypeGroup.id == DocType.doc_type_group_id)
         
         query = query.distinct()
 

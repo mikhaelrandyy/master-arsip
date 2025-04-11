@@ -18,13 +18,14 @@ from models import (
     Worker
 )
 from common.generator import generate_code
-from common.enum import CodeCounterEnum, WorkflowLastStatusEnum
+from common.enum import CodeCounterEnum, WorkflowLastStatusEnum, WorkflowEntityEnum
 from schemas.common_sch import OrderEnumSch
 from schemas.memo_sch import MemoCreateSch, MemoUpdateSch, MemoByIdSch
 from schemas.memo_doc_sch import MemoDocCreateSch, MemoDocUpdateSch, MemoDocSch
 from schemas.memo_doc_column_sch import MemoDocColumnCreateSch, MemoDocColumnUpdateSch, MemoDocColumnSch
 from schemas.memo_doc_attachment_sch import MemoDocAttachmentCreateSch, MemoDocAttachmentUpdateSch, MemoDocAttachmentSch
 from schemas.memo_doc_asal_hak_sch import MemoDocAsalHakCreateSch, MemoDocAsalHakUpdateSch, MemoDocAsalHakSch
+from schemas.workflow_sch import WorkflowCreateSch
 from schemas.oauth import AccessToken
 from datetime import datetime, timezone
 import crud
@@ -187,7 +188,31 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
         await db.session.refresh(obj_current)
 
         return obj_current
+    
+    async def submit(self, *, obj_current: Memo, updated_by: str) -> Memo:
         
+        workflow = await self.create_workflow(reference_id=obj_current.id, created_by=updated_by)
+        obj_updated = Memo.model_validate(obj_current)
+        obj_updated.workflow_id = workflow.id
+
+        obj_updated = await self.update(obj_current=obj_current, obj_new=obj_updated, updated_by=updated_by)
+        return obj_updated
+        
+    async def create_workflow(self, *, reference_id: str, created_by: str | None = None):
+        template = await crud.workflow_template.get_by_entity(entity=WorkflowEntityEnum.MEMO)
+        sch = WorkflowCreateSch(
+            reference_id=reference_id, 
+            entity=template.entity, 
+            flow_id=template.flow_id, 
+            version=1, 
+            last_status=WorkflowLastStatusEnum.ISSUED, 
+            step_name="ISSUED"
+        )
+
+        workflow = await crud.workflow.create(obj_in=sch, created_by=created_by, with_commit=False)
+        return workflow
+
+
     async def get_by_id(self, *, id:str):
         memo = await self.fetch_memo(id=id)
         if not memo: 
