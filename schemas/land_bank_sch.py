@@ -4,10 +4,12 @@ class LandBankCreateSch(LandBankBase):
     pass
 
 class LandBankSch(LandBank):
-    pass
+    project_code: str
+    company_code: str
 
 class LandBankUpdateSch(LandBankBase):
     pass
 
 class LandBankByIdSch(LandBankBase):
-    pass
+    project_code: str
+    company_code: str
