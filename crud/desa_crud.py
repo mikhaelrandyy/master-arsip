@@ -10,6 +10,20 @@ from schemas.oauth import AccessToken
 
 
 class CRUDDesa(CRUDBase[Desa, DesaCreateSch, DesaUpdateSch]):
+
+   async def get_by_id(self, *, id:str):
+      desa = await self.fetch_desa(id=id)
+      if not desa: return None
+      
+      return desa
+   
+   async def fetch_desa(self, id:str):
+        query = self.base_query()
+        query = query.where(Desa.id == id)
+
+        response = await db.session.execute(query)
+        return response.one_or_none()
+   
    async def get_paginated(self, *, params, login_user: AccessToken | None = None, **kwargs):
       query = self.base_query()
       query = self.create_filter(query=query, login_user=login_user, filter=kwargs)

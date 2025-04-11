@@ -3,6 +3,7 @@ from fastapi_pagination import Params
 from schemas.desa_sch import (DesaSch, DesaUpdateSch, DesaCreateSch, DesaByIdSch)
 from schemas.response_sch import (PostResponseBaseSch, GetResponseBaseSch, GetResponsePaginatedSch, create_response)
 from schemas.common_sch import OrderEnumSch
+from schemas.oauth import AccessToken
 from models.desa_model import Desa
 import crud
 from utils.exceptions.common_exception import IdNotFoundException
@@ -50,9 +51,7 @@ async def create(request: Request, sch: DesaCreateSch):
 @router.put("/{id}", response_model=PostResponseBaseSch[DesaByIdSch], status_code=status.HTTP_201_CREATED)
 async def update(id: str, request: Request, obj_new: DesaUpdateSch):
     
-    if hasattr(request.state, 'login_user'):
-        login_user = request.state.login_user
-
+    login_user : AccessToken = request.state.login_user
     obj_current = await crud.desa.get(id=id)
     if not obj_current:
         raise HTTPException(status_code=404, detail=f"Desa tidak ditemukan")

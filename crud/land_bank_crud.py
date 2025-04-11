@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_async_sqlalchemy import db
-from sqlmodel import select, or_, cast, func, Integer, desc
+from sqlmodel import select, or_, cast, func, Integer, case
 from crud.base_crud import CRUDBase
 from models import LandBank, Project, Desa, Company
 from schemas.land_bank_sch import LandBankCreateSch, LandBankUpdateSch
@@ -101,16 +101,36 @@ class CRUDLandBank(CRUDBase[LandBank, LandBankCreateSch, LandBankUpdateSch]):
 
     def base_query(self):
 
+        total_luas_tanah = (
+                        select(
+                            LandBank.parent_id.label('parent_id'),
+                            func.sum(LandBank.luas_tanah).label('total')
+                        )
+                        .where(LandBank.parent_id != None)
+                        .group_by(LandBank.parent_id)
+                    ).subquery()
+        
         query = select(
                     *LandBank.__table__.columns,
                     Project.code.label('project_code'),
-                    Company.code.label('company_code')
+                    Company.code.label('company_code'),
+                    total_luas_tanah.c.total.label('luas_pemisah'),
+                    case(
+                        (LandBank.parent_id == None,
+                         LandBank.luas_tanah - func.coalesce(total_luas_tanah.c.total, 0))
+                    ).label("sisa_luas")
                 )
 
         query = query.outerjoin(Project, Project.id == LandBank.project_id
                     ).outerjoin(Desa, Desa.id == LandBank.desa_id
-                    ).outerjoin(Company, Company.id == LandBank.company_id)
-
+                    ).outerjoin(Company, Company.id == LandBank.company_id
+                    ).outerjoin(total_luas_tanah, total_luas_tanah.c.parent_id == 
+                        case(
+                            (LandBank.parent_id != None, LandBank.parent_id),
+                            else_=LandBank.id
+                        )
+                    )
+    
         return query
    
     def create_filter(self, *, login_user: AccessToken | None = None, query, filter: dict):
