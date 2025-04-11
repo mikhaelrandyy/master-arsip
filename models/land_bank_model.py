@@ -11,9 +11,9 @@ class LandBankBase(SQLModel):
     alashak_id: str | None = Field(nullable=True, foreign_key="alashak.id")
     doc_no: str = Field(nullable=False)
     reason: str | None = Field(nullable=True, default=None)
-    luas_tanah: Decimal = Field(nullable=False, default=0)
-    luas_awal: Decimal | None = Field(nullable=True, default=0)
-    luas_sertifikat: Decimal | None = Field(nullable=True, default=0)
+    luas_tanah: float = Field(nullable=False, default=0)
+    luas_awal: float | None = Field(nullable=True, default=0)
+    luas_sertifikat: float | None = Field(nullable=True, default=0)
     parent_id: str | None = Field(nullable=True, foreign_key="land_bank.id")
 
 class LandBankFullBase(LandBankBase, BaseULIDModel):

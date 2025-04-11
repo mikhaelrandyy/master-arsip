@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_async_sqlalchemy import db
-from sqlmodel import select, or_, cast, func, Integer, case
+from sqlmodel import select, or_, cast, func, Integer, case, Numeric
 from crud.base_crud import CRUDBase
 from models import LandBank, Project, Desa, Company
 from schemas.land_bank_sch import LandBankCreateSch, LandBankUpdateSch
@@ -114,10 +114,13 @@ class CRUDLandBank(CRUDBase[LandBank, LandBankCreateSch, LandBankUpdateSch]):
                     *LandBank.__table__.columns,
                     Project.code.label('project_code'),
                     Company.code.label('company_code'),
-                    total_luas_tanah.c.total.label('luas_pemisah'),
-                    case(
-                        (LandBank.parent_id == None,
-                         LandBank.luas_tanah - func.coalesce(total_luas_tanah.c.total, 0))
+                    cast(total_luas_tanah.c.total, Numeric).label('luas_pemisah'),
+                    cast(
+                        case(
+                            (LandBank.parent_id == None,
+                             LandBank.luas_tanah - func.coalesce(total_luas_tanah.c.total, 0))
+                        ),
+                        Numeric
                     ).label("sisa_luas")
                 )
 

@@ -1,5 +1,6 @@
 from models.land_bank_model import LandBank, LandBankBase
 from decimal import Decimal
+from typing import Optional
 
 class LandBankCreateSch(LandBankBase):
     pass
@@ -7,8 +8,8 @@ class LandBankCreateSch(LandBankBase):
 class LandBankSch(LandBank):
     project_code: str
     company_code: str
-    luas_pemisah: Decimal | None = 0
-    sisa_luas: Decimal | None = 0
+    luas_pemisah: float | None
+    sisa_luas: float | None
 
 class LandBankUpdateSch(LandBankBase):
     pass
