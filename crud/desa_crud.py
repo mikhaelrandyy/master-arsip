@@ -20,7 +20,6 @@ class CRUDDesa(CRUDBase[Desa, DesaCreateSch, DesaUpdateSch]):
    async def fetch_desa(self, id:str):
         query = self.base_query()
         query = query.where(Desa.id == id)
-
         response = await db.session.execute(query)
         return response.one_or_none()
    

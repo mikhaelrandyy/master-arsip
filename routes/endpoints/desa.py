@@ -56,8 +56,7 @@ async def update(id: str, request: Request, obj_new: DesaUpdateSch):
     if not obj_current:
         raise HTTPException(status_code=404, detail=f"Desa tidak ditemukan")
     obj_updated = await crud.desa.update(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
-    response_obj = await crud.desa.get_by_id(id=obj_updated.id)
-    return create_response(data=response_obj)
+    return create_response(data=obj_updated)
 
 
 
