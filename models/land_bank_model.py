@@ -3,7 +3,7 @@ from models.base_model import BaseULIDModel, SQLModel
 from decimal import Decimal
 
 class LandBankBase(SQLModel):
-    code: str | None = Field(nullable=False)
+    code: str | None = Field(nullable=False, default=None, unique=True)
     descs: str | None = Field(nullable=True, default=None)
     project_id: str = Field(nullable=False, foreign_key='project.id')
     company_id: str = Field(nullable=False, foreign_key='company.id')

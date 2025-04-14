@@ -50,18 +50,18 @@ async def create(request: Request, sch: LandBankCreateSch):
     response_obj = await crud.land_bank.get_by_id(id=obj.id)
     return create_response(data=response_obj)
 
-# @router.put("/{id}", response_model=PostResponseBaseSch[LandBankByIdSch], status_code=status.HTTP_201_CREATED)
-# async def update(id: str, request: Request, obj_new: LandBankUpdateSch):
+@router.put("/{id}", response_model=PostResponseBaseSch[LandBankSch], status_code=status.HTTP_201_CREATED)
+async def update(id: str, request: Request, obj_new: LandBankUpdateSch):
     
-#     if hasattr(request.state, 'login_user'):
-#         login_user = request.state.login_user
+    if hasattr(request.state, 'login_user'):
+        login_user = request.state.login_user
 
-#     obj_current = await crud.land_bank.get(id=id)
-#     if not obj_current:
-#         raise HTTPException(status_code=404, detail=f"LandBank tidak ditemukan")
-#     obj_updated = await crud.land_bank.update(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
-#     response_obj = await crud.land_bank.get_by_id(id=obj_updated.id)
-#     return create_response(data=response_obj)
+    obj_current = await crud.land_bank.get(id=id)
+    if not obj_current:
+        raise HTTPException(status_code=404, detail=f"LandBank tidak ditemukan")
+    obj_updated = await crud.land_bank.update(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
+    response_obj = await crud.land_bank.get_by_id(id=obj_updated.id)
+    return create_response(data=response_obj)
 
 
 

@@ -1,9 +1,15 @@
 from fastapi import HTTPException
 from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_async_sqlalchemy import db
-from sqlmodel import select, or_, cast, func, Integer, case, Numeric
+from sqlmodel import select, or_, func
+from sqlalchemy.orm import aliased
 from crud.base_crud import CRUDBase
-from models import LandBank, Project, Desa, Company
+from models import (
+    LandBank, 
+    Project, 
+    Desa, 
+    Company,
+    Alashak)
 from schemas.land_bank_sch import LandBankCreateSch, LandBankUpdateSch
 from schemas.common_sch import OrderEnumSch
 from schemas.oauth import AccessToken
@@ -13,41 +19,8 @@ from datetime import datetime
 
 class CRUDLandBank(CRUDBase[LandBank, LandBankCreateSch, LandBankUpdateSch]):
     async def create_land_bank(self, *, sch:LandBankCreateSch, created_by:str) -> LandBank:
-        
-        year = datetime.today().year
-        project = await crud.project.get(id=sch.project_id)
-        desa = await crud.desa.get(id=sch.desa_id)
-        
-        if sch.parent_id is None:
-
-            land_bank = await self.get_last_code_for_land_bank()
-            parent = await crud.land_bank.get(id=land_bank)
-
-            parent_code = 0
-
-            if land_bank:
-                current_code = int(parent.code.split('.')[-1])
-                sch.code = f"L-{year}-{project.code}-{desa.code}.{current_code + 1:05d}"
-            else:
-                sch.code = f"L-{year}-{project.code}-{desa.code}.{parent_code + 1:05d}"
-
-        else:
-
-            land_bank = await self.get_last_code_for_land_bank(parent_id=sch.parent_id)
-            parent = await crud.land_bank.get(id=land_bank)
-
-            child_code = 0
-
-            if land_bank:
-                current_children = int(parent.code.split('.')[-1])
-                current_parent = parent.code.split('.')[1]
-                sch.code = f"L-{year}-{project.code}-{desa.code}.{current_parent}.{current_children + 1}"
-            else:
-                sch.code = f"{parent.code}.{child_code + 1}"
-
-        # db_obj = LandBank(**sch.model_dump())
-
         db_obj = LandBank.model_validate(sch)
+        db_obj.code = await self.generate_code(sch=sch)
 
         if created_by:
             db_obj.created_by = db_obj.updated_by = created_by
@@ -58,19 +31,23 @@ class CRUDLandBank(CRUDBase[LandBank, LandBankCreateSch, LandBankUpdateSch]):
         await db.session.refresh(db_obj)
 
         return db_obj
-   
-    async def get_last_code_for_land_bank(self, *, parent_id: str | None = None) -> LandBank:
-       
-        query = self.base_query()
-
-        if parent_id:
-            query = query.filter(LandBank.parent_id.ilike(f"%{parent_id}%"))
-            query = query.order_by(LandBank.created_at.desc()).limit(1)
+    
+    async def generate_code(self, *, sch:LandBankCreateSch):
+        project = await crud.project.get(id=sch.project_id)
+        desa = await crud.desa.get(id=sch.desa_id)
+        last_land_bank = await self.get_last(parent_id=sch.parent_id)
+        
+        if sch.parent_id is None:
+            prefix = f"L-{datetime.today().year}-{project.code}-{desa.code}."
+            code = f"{prefix}{int(last_land_bank.code.split('.')[-1]) + 1:05d}" if last_land_bank else f"{prefix}{1:05d}"
         else:
-            query = query.filter(LandBank.parent_id == None)
-            query = query.order_by(LandBank.code.desc()).limit(1)
+            parent_land_bank = await self.get(id=sch.parent_id)
+            code = f"{parent_land_bank.code}.{int(last_land_bank.code.split('.')[-1]) + 1}" if last_land_bank else f"{parent_land_bank.code}.{1}"
 
-        response = await db.session.execute(query)
+        return code
+   
+    async def get_last(self, *, parent_id: str | None = None) -> LandBank | None:
+        response = await db.session.execute(select(LandBank).where(LandBank.parent_id == parent_id).order_by(LandBank.created_at.desc()).limit(1))
         return response.scalar_one_or_none()
     
     async def get_by_id(self, *, id:str):
@@ -100,39 +77,36 @@ class CRUDLandBank(CRUDBase[LandBank, LandBankCreateSch, LandBankUpdateSch]):
         return response.mappings().all()
 
     def base_query(self):
-
+        land_parent = aliased(LandBank)
         total_luas_tanah = (
-                        select(
-                            LandBank.parent_id.label('parent_id'),
-                            func.sum(LandBank.luas_tanah).label('total')
-                        )
-                        .where(LandBank.parent_id != None)
-                        .group_by(LandBank.parent_id)
-                    ).subquery()
+            select(
+                LandBank.parent_id.label('parent_id'),
+                func.sum(func.coalesce(LandBank.luas_tanah, 0)).label('total_luas')
+            )
+            .where(LandBank.parent_id != None)
+            .group_by(LandBank.parent_id).cte("total_luas_cte")
+        )
         
         query = select(
                     *LandBank.__table__.columns,
                     Project.code.label('project_code'),
+                    Project.name.label('project_name'),
+                    Desa.code.label('desa_code'),
+                    Desa.name.label('desa_name'),
                     Company.code.label('company_code'),
-                    cast(total_luas_tanah.c.total, Numeric).label('luas_pemisah'),
-                    cast(
-                        case(
-                            (LandBank.parent_id == None,
-                             LandBank.luas_tanah - func.coalesce(total_luas_tanah.c.total, 0))
-                        ),
-                        Numeric
-                    ).label("sisa_luas")
+                    Company.name.label('company_name'),
+                    Alashak.name.label('alashak_name'),
+                    func.coalesce(total_luas_tanah.c.total_luas, 0).label('luas_pemisah'),
+                    (func.coalesce(LandBank.luas_tanah, 0) - func.coalesce(total_luas_tanah.c.total_luas, 0)).label('sisa_luas'),
+                    land_parent.code.label('parent_code')
                 )
 
         query = query.outerjoin(Project, Project.id == LandBank.project_id
                     ).outerjoin(Desa, Desa.id == LandBank.desa_id
                     ).outerjoin(Company, Company.id == LandBank.company_id
-                    ).outerjoin(total_luas_tanah, total_luas_tanah.c.parent_id == 
-                        case(
-                            (LandBank.parent_id != None, LandBank.parent_id),
-                            else_=LandBank.id
-                        )
-                    )
+                    ).outerjoin(Alashak, Alashak.id == LandBank.alashak_id
+                    ).outerjoin(total_luas_tanah, LandBank.id == total_luas_tanah.c.parent_id
+                    ).outerjoin(land_parent, land_parent.id == LandBank.parent_id)
     
         return query
    
