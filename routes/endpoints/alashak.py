@@ -62,8 +62,18 @@ async def update(id: str, request: Request, obj_new: AlashakUpdateSch):
     
     login_user : AccessToken = request.state.login_user
     obj_current = await crud.alashak.get(id=id)
+
     if not obj_current:
         raise HTTPException(status_code=404, detail=f"Alashak tidak ditemukan")
+    
+    obj_code_current = await crud.alashak.get_by_code_upper(code=obj_new.code)
+    if obj_code_current and obj_current.id != obj_code_current.id:
+        raise HTTPException(status_code=400, detail="Alashak dengan code yang sama sudah tersedia")
+    
+    obj_name_current = await crud.alashak.get_by_name_upper(name=obj_new.name.strip())
+    if obj_name_current and obj_current.id != obj_name_current.id:
+        raise HTTPException(status_code=400, detail="Alashak dengan nama yang sama sudah tersedia")
+
     obj_updated = await crud.alashak.update(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
     response_obj = await crud.alashak.get(id=obj_updated.id)
     return create_response(data=response_obj)

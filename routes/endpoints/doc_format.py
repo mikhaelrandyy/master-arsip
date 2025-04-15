@@ -47,7 +47,6 @@ async def create(request: Request, sch: DocFormatCreateSch):
     login_user : AccessToken = request.state.login_user
 
     obj_name_current = await crud.doc_format.get_by_name_upper(name=sch.name.strip())
-
     if obj_name_current:
         raise HTTPException(status_code=400, detail="DOC FORMAT dengan nama yang sama sudah tersedia")
     
@@ -61,6 +60,11 @@ async def update(id: str, request: Request, obj_new: DocFormatUpdateSch):
     obj_current = await crud.doc_format.get(id=id)
     if not obj_current:
         raise HTTPException(status_code=404, detail=f"Document Format tidak ditemukan")
+    
+    obj_name_current = await crud.doc_format.get_by_name_upper(name=obj_new.name.strip())
+    if obj_name_current and obj_current.id != obj_name_current.id:
+        raise HTTPException(status_code=400, detail="DOC FORMAT dengan nama yang sama sudah tersedia")
+    
     obj_updated = await crud.doc_format.update(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
     return create_response(data=obj_updated)
 
