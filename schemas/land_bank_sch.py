@@ -6,6 +6,10 @@ class LandBankCreateSch(LandBankBase):
     pass
 
 class LandBankSch(LandBankFullBase):
+<<<<<<< Updated upstream
+=======
+    project_code: str
+>>>>>>> Stashed changes
     company_code: str
     company_name: str
     desa_code: str
@@ -20,6 +24,19 @@ class LandBankSch(LandBankFullBase):
 class LandBankUpdateSch(LandBankBase):
     pass
 
+<<<<<<< Updated upstream
 class LandBankByIdSch(LandBankSch):
     pass
 
+=======
+class LandBankByIdSch(LandBankFullBase):
+    company_name: str
+    company_code: str
+    project_name: str
+    project_code: str
+    desa_name: str
+    alashak_name: str
+    parent_code: str 
+
+    
+>>>>>>> Stashed changes

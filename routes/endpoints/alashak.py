@@ -3,6 +3,7 @@ from sqlmodel import select, or_
 from sqlalchemy.orm import selectinload
 from fastapi_pagination import Params
 from schemas.common_sch import OrderEnumSch
+from schemas.oauth import AccessToken
 from schemas.alashak_sch import (AlashakSch, AlashakUpdateSch, AlashakCreateSch, AlashakByIdSch)
 from schemas.response_sch import (PostResponseBaseSch, GetResponseBaseSch, GetResponsePaginatedSch, create_response)
 from models.alashak_model import Alashak
@@ -43,16 +44,14 @@ async def get_by_id(id: str):
 async def create(request: Request, sch: AlashakCreateSch):
     
     """Create a new object"""
-    if hasattr(request.state, 'login_user'):
-        login_user=request.state.login_user
+    login_user : AccessToken = request.state.login_user
     obj = await crud.alashak.create(obj_in=sch, created_by=login_user.client_id)
     return create_response(data=obj)
 
 @router.put("/{id}", response_model=PostResponseBaseSch[AlashakByIdSch], status_code=status.HTTP_201_CREATED)
 async def update(id: str, request: Request, obj_new: AlashakUpdateSch):
     
-    if hasattr(request.state, 'login_user'):
-        login_user = request.state.login_user
+    login_user : AccessToken = request.state.login_user
     obj_current = await crud.alashak.get(id=id)
     if not obj_current:
         raise HTTPException(status_code=404, detail=f"Alashak tidak ditemukan")
