@@ -19,11 +19,11 @@ async def notification(payload: dict, request:Request):
     
     """Notification Workflow"""
     try:
-        signature = request.headers.get("Signature", None)
-        verify = SignatureService().verify_signature_request(msg=payload, signature=signature, client_public_key=settings.WF_PUBLIC_KEY)
+        # signature = request.headers.get("Signature", None)
+        # verify = SignatureService().verify_signature_request(msg=payload, signature=signature, client_public_key=settings.WF_PUBLIC_KEY)
 
-        if verify == False:
-            raise HTTPException(status_code=401, detail="Signature not authorize!")
+        # if verify == False:
+        #     raise HTTPException(status_code=401, detail="Signature not authorize!")
         
         await crud.workflow.notification(payload=payload, request=request)
 
