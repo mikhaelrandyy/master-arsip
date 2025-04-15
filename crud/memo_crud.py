@@ -18,20 +18,21 @@ from models import (
     Worker
 )
 from common.generator import generate_code
-from common.enum import CodeCounterEnum, WorkflowLastStatusEnum, WorkflowEntityEnum
+from common.enum import CodeCounterEnum, WorkflowLastStatusEnum, WorkflowEntityEnum, DocumentCategoryEnum, WorkflowStepEnum
 from schemas.common_sch import OrderEnumSch
 from schemas.memo_sch import MemoCreateSch, MemoUpdateSch, MemoByIdSch
 from schemas.memo_doc_sch import MemoDocCreateSch, MemoDocUpdateSch, MemoDocSch
 from schemas.memo_doc_column_sch import MemoDocColumnCreateSch, MemoDocColumnUpdateSch, MemoDocColumnSch
 from schemas.memo_doc_attachment_sch import MemoDocAttachmentCreateSch, MemoDocAttachmentUpdateSch, MemoDocAttachmentSch
 from schemas.memo_doc_asal_hak_sch import MemoDocAsalHakCreateSch, MemoDocAsalHakUpdateSch, MemoDocAsalHakSch
-from schemas.workflow_sch import WorkflowCreateSch
+from schemas.workflow_sch import WorkflowCreateSch, WorkflowSystemCreateSch
 from schemas.oauth import AccessToken
+from services.workflow_service import WorkflowService
 from datetime import datetime, timezone
 import crud
 
 class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
-    async def create(self, *, memo:MemoCreateSch, created_by:str) -> Memo:
+    async def create_memo(self, *, memo:MemoCreateSch, created_by:str) -> Memo:
 
         memo.code = await generate_code(entity=CodeCounterEnum.MEMO)
         db_obj = Memo.model_validate(memo)
@@ -82,7 +83,7 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
         await db.session.refresh(db_obj)
         return db_obj
     
-    async def update(self, *, obj_current: Memo, obj_new: MemoUpdateSch, updated_by: str) -> Memo:
+    async def update_memo(self, *, obj_current: Memo, obj_new: MemoUpdateSch, updated_by: str) -> Memo:
 
         obj_data = jsonable_encoder(obj_current)
         update_data = obj_new if isinstance(obj_new, dict) else obj_new.dict(exclude_unset=True)
@@ -194,26 +195,58 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
     
     async def submit(self, *, obj_current: Memo, updated_by: str) -> Memo:
         
-        workflow = await self.create_workflow(reference_id=obj_current.id, created_by=updated_by)
-        obj_updated = Memo.model_validate(obj_current)
+        workflow = await self.create_workflow(obj_current=obj_current, created_by=updated_by)
+
+        # await self.consume_workflow(workflow=workflow, memo=obj_current)
+
+        obj_updated = MemoUpdateSch.model_validate(obj_current)
         obj_updated.workflow_id = workflow.id
 
         obj_updated = await self.update(obj_current=obj_current, obj_new=obj_updated, updated_by=updated_by)
         return obj_updated
         
-    async def create_workflow(self, *, reference_id: str, created_by: str | None = None):
+    async def create_workflow(self, *, obj_current: Memo, created_by: str | None = None):
         template = await crud.workflow_template.get_by_entity(entity=WorkflowEntityEnum.MEMO)
         sch = WorkflowCreateSch(
-            reference_id=reference_id, 
+            reference_id=obj_current.id, 
             entity=template.entity, 
             flow_id=template.flow_id, 
             version=1, 
             last_status=WorkflowLastStatusEnum.ISSUED, 
-            step_name="ISSUED"
+            step_name=WorkflowStepEnum.ISSUED
         )
 
         workflow = await crud.workflow.create(obj_in=sch, created_by=created_by, with_commit=False)
         return workflow
+    
+    async def consume_workflow(self, *, workflow: Workflow, memo: Memo):
+        additional_info = self.get_additional_info(doc_category=memo.doc_category)
+
+        workflow_system = WorkflowSystemCreateSch(
+            client_ref_no= workflow.reference_id,
+            flow_id=workflow.flow_id,
+            additional_info=additional_info,
+            attachments=[],
+            version=workflow.version, 
+            descs=""
+        )
+
+        body = jsonable_encoder(workflow_system)
+        response, msg = await WorkflowService().create_workflow(body=body)
+
+        if response is None:
+            print(msg=f"MEMO {memo.code} Failed to connect workflow system. Detail : {msg}")
+            raise HTTPException(status_code=422, detail=f"Failed to connect workflow system. Detail : {msg}")
+
+    
+    def get_additional_info(self, *, doc_category: DocumentCategoryEnum):
+        match doc_category:
+            case DocumentCategoryEnum.MASUK | DocumentCategoryEnum.MASUK_HOLD | DocumentCategoryEnum.KEMBALI:
+                return {"doc_arsip": "masuk_kembali_masukhold"}
+            case DocumentCategoryEnum.KELUAR | DocumentCategoryEnum.PINJAM:
+                return {"doc_arsip": "keluar_pinjam"}
+            case DocumentCategoryEnum.HOLD | DocumentCategoryEnum.UNHOLD:
+                return {"doc_arsip": "hold_unhold"}
 
 
     async def get_by_id(self, *, id:str):
@@ -246,7 +279,7 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
                 Project.code.label('project_code'),
                 Company.code.label('company_code'),
                 case((Workflow.last_status.in_([WorkflowLastStatusEnum.COMPLETED, WorkflowLastStatusEnum.REJECTED]), cast(Workflow.last_status, String)),
-                    (Workflow.last_status.notin_([WorkflowLastStatusEnum.COMPLETED, WorkflowLastStatusEnum.REJECTED]), Workflow.step_name),
+                    (Workflow.last_status.notin_([WorkflowLastStatusEnum.COMPLETED, WorkflowLastStatusEnum.REJECTED]), cast(Workflow.step_name, String)),
                     else_ = None).label("workflow_status")
             )
         

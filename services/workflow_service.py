@@ -1,7 +1,7 @@
-from fastapi import requests
 from typing import Tuple
 from schemas.workflow_sch import WorkflowCreateResponseSch
 from configs.config import settings
+import requests
 
 
 class WorkflowService:

@@ -47,7 +47,7 @@ async def create(request: Request, sch: MemoCreateSch):
     
     """Create a new object"""
     login_user: AccessToken = request.state.login_user
-    obj = await crud.memo.create(memo=sch, created_by=login_user.client_id)
+    obj = await crud.memo.create_memo(memo=sch, created_by=login_user.client_id)
     response_obj = await crud.memo.get_by_id(id=obj.id)
     return create_response(data=response_obj)
 
@@ -60,7 +60,7 @@ async def update(id: str, request: Request, obj_new: MemoUpdateSch):
     if not obj_current:
         raise HTTPException(status_code=404, detail=f"Memo tidak ditemukan")
     
-    obj_updated = await crud.memo.update(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
+    obj_updated = await crud.memo.update_memo(obj_current=obj_current, obj_new=obj_new, updated_by=login_user.client_id)
     response_obj = await crud.memo.get_by_id(id=obj_updated.id)
     return create_response(data=response_obj)
 

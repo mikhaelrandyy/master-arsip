@@ -74,7 +74,8 @@ class CRUDWorkflow(CRUDBase[Workflow, WorkflowCreateSch, WorkflowUpdateSch]):
     async def create_next_approver(self, sch:WorkflowSystemCallbackSch, obj_updated:Workflow):
         if sch.next_approver:
             for next_approver in sch.next_approver:
-                obj_next_approver_new = WorkflowNextApproverCreateSch(**next_approver.model_dump(), workflow_id=obj_updated.id)
+                obj_next_approver_new = WorkflowNextApproverCreateSch(**next_approver.model_dump())
+                obj_next_approver_new.workflow_id=obj_updated.id
                 await crud.workflow_next_approver.create(obj_in=obj_next_approver_new, created_by=obj_updated.created_by, with_commit=False)
 
     async def handle_completed(self, workflow: Workflow, request: Request):
