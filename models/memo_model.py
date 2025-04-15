@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from models import DocFormat, Company, Project
 
 class MemoBase(SQLModel):
-    code: str | None = Field(nullable=True, unique=True)
+    code: str | None = Field(nullable=True, unique=True, default=None)
     jenis_arsip: JenisArsipEnum = Field(nullable=False)
     doc_category: DocumentCategoryEnum = Field(nullable=False)
     doc_format_id: str | None = Field(foreign_key='doc_format.id')
@@ -24,7 +24,7 @@ class MemoBase(SQLModel):
     outgoing_to_department_id: str | None = Field(nullable=True, foreign_key="department.id")
     outgoing_doc_type: OutgoingToDocTypeEnum | None = Field(nullable=True)
     outgoing_to_jenis_arsip: JenisArsipEnum | None = Field(nullable=True)
-    workflow_id: str | None = Field(foreign_key="workflow.id", nullable=True)
+    workflow_id: str | None = Field(foreign_key="workflow.id", nullable=True, default=None)
 
 class MemoFullBase(BaseULIDModel, MemoBase):
     pass

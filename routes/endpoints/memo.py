@@ -64,7 +64,7 @@ async def update(id: str, request: Request, obj_new: MemoUpdateSch):
     response_obj = await crud.memo.get_by_id(id=obj_updated.id)
     return create_response(data=response_obj)
 
-@router.post("", response_model=PostResponseBaseSch[MemoSch], status_code=status.HTTP_201_CREATED)
+@router.post("/submit", response_model=PostResponseBaseSch[MemoSch], status_code=status.HTTP_201_CREATED)
 async def submit(request: Request, id: str):
     
     """Create a new object"""
@@ -77,7 +77,7 @@ async def submit(request: Request, id: str):
     if obj_current.created_by != login_user.client_id:
         raise HTTPException(status_code=400, detail="Anda tidak memiliki hak untuk SUBMIT memo ini!")
 
-    obj = await crud.memo.submit(obj_current=obj_current)
+    obj = await crud.memo.submit(obj_current=obj_current, updated_by=login_user.client_id)
     response_obj = await crud.memo.get_by_id(id=obj.id)
     return create_response(data=response_obj)
 
