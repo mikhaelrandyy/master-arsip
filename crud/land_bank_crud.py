@@ -1,22 +1,10 @@
 from fastapi import HTTPException
 from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_async_sqlalchemy import db
-<<<<<<< Updated upstream
-from sqlmodel import select, or_, func
-from sqlalchemy.orm import aliased
-from crud.base_crud import CRUDBase
-from models import (
-    LandBank, 
-    Project, 
-    Desa, 
-    Company,
-    Alashak)
-=======
 from sqlmodel import select, or_, cast, func, Integer, case, Numeric
 from sqlalchemy.orm import aliased
 from crud.base_crud import CRUDBase
 from models import LandBank, Project, Desa, Company, Alashak
->>>>>>> Stashed changes
 from schemas.land_bank_sch import LandBankCreateSch, LandBankUpdateSch
 from schemas.common_sch import OrderEnumSch
 from schemas.oauth import AccessToken
@@ -84,13 +72,9 @@ class CRUDLandBank(CRUDBase[LandBank, LandBankCreateSch, LandBankUpdateSch]):
         return response.mappings().all()
 
     def base_query(self):
-<<<<<<< Updated upstream
-        land_parent = aliased(LandBank)
-=======
 
         ParentLandBank = aliased(LandBank)
 
->>>>>>> Stashed changes
         total_luas_tanah = (
             select(
                 LandBank.parent_id.label('parent_id'),
@@ -104,17 +88,6 @@ class CRUDLandBank(CRUDBase[LandBank, LandBankCreateSch, LandBankUpdateSch]):
                     *LandBank.__table__.columns,
                     Project.name.label('project_name'),
                     Project.code.label('project_code'),
-<<<<<<< Updated upstream
-                    Project.name.label('project_name'),
-                    Desa.code.label('desa_code'),
-                    Desa.name.label('desa_name'),
-                    Company.code.label('company_code'),
-                    Company.name.label('company_name'),
-                    Alashak.name.label('alashak_name'),
-                    func.coalesce(total_luas_tanah.c.total_luas, 0).label('luas_pemisah'),
-                    (func.coalesce(LandBank.luas_tanah, 0) - func.coalesce(total_luas_tanah.c.total_luas, 0)).label('sisa_luas'),
-                    land_parent.code.label('parent_code')
-=======
                     Company.name.label('company_name'),
                     Company.code.label('company_code'),
                     Desa.name.label('desa_name'),
@@ -122,17 +95,12 @@ class CRUDLandBank(CRUDBase[LandBank, LandBankCreateSch, LandBankUpdateSch]):
                     ParentLandBank.code.label('parent_code'),
                     case((LandBank.parent_id == None, total_luas_tanah.c.total), else_=None).label('luas_pemisah'),
                     case((LandBank.parent_id == None, LandBank.luas_tanah - func.coalesce(total_luas_tanah.c.total, 0)), else_=None).label("sisa_luas")
->>>>>>> Stashed changes
                 )
 
         query = query.outerjoin(Project, Project.id == LandBank.project_id
                     ).outerjoin(Desa, Desa.id == LandBank.desa_id
                     ).outerjoin(Company, Company.id == LandBank.company_id
                     ).outerjoin(Alashak, Alashak.id == LandBank.alashak_id
-<<<<<<< Updated upstream
-                    ).outerjoin(total_luas_tanah, LandBank.id == total_luas_tanah.c.parent_id
-                    ).outerjoin(land_parent, land_parent.id == LandBank.parent_id)
-=======
                     ).outerjoin(ParentLandBank, ParentLandBank.parent_id == LandBank.id
                     ).outerjoin(total_luas_tanah, total_luas_tanah.c.parent_id == 
                         case(
@@ -140,7 +108,6 @@ class CRUDLandBank(CRUDBase[LandBank, LandBankCreateSch, LandBankUpdateSch]):
                             else_=LandBank.id
                         )
                     )
->>>>>>> Stashed changes
     
         return query
    
