@@ -1,5 +1,5 @@
 from sqlmodel import SQLModel, Field, Relationship
-from common.enum import WorkflowLastStatusEnum, WorkflowEntityEnum
+from common.enum import WorkflowLastStatusEnum, WorkflowEntityEnum, WorkflowStepEnum
 from models.base_model import BaseULIDModel
 from datetime import datetime
 from pydantic import EmailStr
@@ -7,8 +7,8 @@ from pydantic import EmailStr
 class WorkflowBase(SQLModel):
     reference_id: str = Field(nullable=False) 
     txn_id: str | None = Field(nullable=True) #id object workflow
-    step_name: str | None = Field(nullable=True)
-    last_status: WorkflowLastStatusEnum | None = Field(nullable=True)
+    step_name: WorkflowStepEnum | None = Field(nullable=True, default=None)
+    last_status: WorkflowLastStatusEnum | None = Field(nullable=True, default=None)
     last_status_at: datetime | None = Field(nullable=True)
     last_step_app_email: str | None = Field(nullable=True)
     last_step_app_name: str | None = Field(nullable=True)
@@ -40,7 +40,7 @@ class WorkflowNextApprover(WorkflowNextApproverFullBase, table=True):
 
 class WorkflowHistoryBase(SQLModel):
     workflow_id: str | None = Field(foreign_key="workflow.id", nullable=False)
-    step_name: str | None = Field(nullable=True)
+    step_name: WorkflowStepEnum | None = Field(nullable=True)
     last_status: WorkflowLastStatusEnum | None = Field(nullable=True)
     last_status_at: datetime | None = Field(nullable=True)
     last_step_app_email: str | None = Field(nullable=True)

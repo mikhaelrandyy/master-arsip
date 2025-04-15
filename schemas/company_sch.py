@@ -1,14 +1,14 @@
-from models.company_model import Company, CompanyBase
+from models.company_model import Company, CompanyBase, CompanyFullBase
 from sqlmodel import SQLModel
 
 class CompanyCreateSch(CompanyBase):
     pass
 
-class CompanySch(Company):
+class CompanySch(CompanyFullBase):
     pass
 
 class CompanyUpdateSch(CompanyBase):
     pass
 
-class CompanyByIdSch(CompanyBase):
+class CompanyByIdSch(CompanyFullBase):
     pass

@@ -43,7 +43,8 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
         await db.session.flush()
 
         for memo_doc in memo.memo_docs:
-            new_memo_doc = MemoDoc(**memo_doc.model_dump(), memo_id=db_obj.id)
+            new_memo_doc = MemoDoc(**memo_doc.model_dump())
+            new_memo_doc.memo_id = db_obj.id
             new_memo_doc = await crud.memo_doc.create(
                 obj_in=new_memo_doc, 
                 created_by=created_by, 
@@ -51,8 +52,8 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
             )
 
             for memo_doc_column in memo_doc.memo_doc_columns:
-                new_memo_doc_column = MemoDocColumn(**memo_doc_column.model_dump(), memo_doc_id=new_memo_doc.id)
-                memo_doc_column.memo_doc_id = new_memo_doc.id
+                new_memo_doc_column = MemoDocColumn(**memo_doc_column.model_dump())
+                new_memo_doc_column.memo_doc_id = new_memo_doc.id
                 await crud.memo_doc_column.create(
                     obj_in=new_memo_doc_column,
                     created_by=created_by,
@@ -60,7 +61,8 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
                 )
             
             for memo_doc_attachment in memo_doc.memo_doc_attachments:
-                new_memo_doc_attachment = MemoDocAttachment(**memo_doc_attachment.model_dump(), memo_doc_id=new_memo_doc.id)
+                new_memo_doc_attachment = MemoDocAttachment(**memo_doc_attachment.model_dump())
+                new_memo_doc_attachment.memo_doc_id=new_memo_doc.id
                 await crud.memo_doc_attachment.create(
                     obj_in=new_memo_doc_attachment,
                     created_by=created_by,
@@ -68,7 +70,8 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
                 )
             
             for memo_doc_asal_hak in memo_doc.memo_doc_asal_haks:
-                new_memo_doc_asal_hak = MemoDocAsalHak(**memo_doc_asal_hak.model_dump(), memo_doc_id=new_memo_doc.id)
+                new_memo_doc_asal_hak = MemoDocAsalHak(**memo_doc_asal_hak.model_dump())
+                new_memo_doc_asal_hak.memo_doc_id=new_memo_doc.id
                 await crud.memo_doc_asal_hak.create(
                     obj_in=new_memo_doc_asal_hak,
                     created_by=created_by,
@@ -242,8 +245,9 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
                 *Memo.__table__.columns,
                 Project.code.label('project_code'),
                 Company.code.label('company_code'),
-                case((Workflow.last_status.in_([WorkflowLastStatusEnum.COMPLETED, WorkflowLastStatusEnum.REJECTED]), Workflow.last_status),
-                else_ = Workflow.step_name).label("workflow_status"),
+                case((Workflow.last_status.in_([WorkflowLastStatusEnum.COMPLETED, WorkflowLastStatusEnum.REJECTED]), cast(Workflow.last_status, String)),
+                    (Workflow.last_status.notin_([WorkflowLastStatusEnum.COMPLETED, WorkflowLastStatusEnum.REJECTED]), Workflow.step_name),
+                    else_ = None).label("workflow_status")
             )
         
         query = query.outerjoin(Project, Project.id == Memo.project_id

@@ -92,3 +92,12 @@ class WorkflowLastStatusEnum(str, Enum):
     REJECTED = "REJECTED"
     NEED_DATA_UPDATE = "NEED_DATA_UPDATE"
     WAITING_APPROVAL = "WAITING_APPROVAL"
+
+class WorkflowStepEnum(str, Enum):
+    ISSUED = "ISSUED"
+    SUBMITTED = "SUBMITTED"
+    APPROVED_1 = "APPROVED 1"
+    RECEIVED = "RECEIVED"
+    CHECKED = "CHECKED"
+    APPROVED_2 = "APPROVED 2"
+    POSTED = "POSTED"

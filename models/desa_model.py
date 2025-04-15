@@ -1,5 +1,5 @@
-from sqlmodel import SQLModel, Field
-from models.base_model import BaseULIDModel
+from sqlmodel import Field
+from models.base_model import BaseULIDModel, SQLModel
 
 class DesaBase(SQLModel):
     code: str = Field(nullable=True, unique=True)
