@@ -43,8 +43,16 @@ async def get_by_id(id: str):
 async def create(request: Request, sch: DesaCreateSch):
     
     """Create a new object"""
-    if hasattr(request.state, 'login_user'):
-        login_user=request.state.login_user
+    login_user : AccessToken = request.state.login_user
+
+    obj_code_current = await crud.desa.get_by_code_upper(code=sch.code)
+    if obj_code_current:
+        raise HTTPException(status_code=400, detail="Desa dengan code yang sama sudah tersedia")
+    
+    obj_name_current = await crud.desa.get_by_name_upper(name=sch.name.strip())
+    if obj_name_current:
+            raise HTTPException(status_code=400, detail="Desa dengan nama yang sama sudah tersedia")
+    
     obj = await crud.desa.create(obj_in=sch, created_by=login_user.client_id)
     return create_response(data=obj)
 

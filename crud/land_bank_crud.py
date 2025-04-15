@@ -72,9 +72,7 @@ class CRUDLandBank(CRUDBase[LandBank, LandBankCreateSch, LandBankUpdateSch]):
         return response.mappings().all()
 
     def base_query(self):
-
-        ParentLandBank = aliased(LandBank)
-
+        land_parent = aliased(LandBank)
         total_luas_tanah = (
             select(
                 LandBank.parent_id.label('parent_id'),
@@ -86,28 +84,24 @@ class CRUDLandBank(CRUDBase[LandBank, LandBankCreateSch, LandBankUpdateSch]):
         
         query = select(
                     *LandBank.__table__.columns,
-                    Project.name.label('project_name'),
                     Project.code.label('project_code'),
-                    Company.name.label('company_name'),
-                    Company.code.label('company_code'),
+                    Project.name.label('project_name'),
+                    Desa.code.label('desa_code'),
                     Desa.name.label('desa_name'),
+                    Company.code.label('company_code'),
+                    Company.name.label('company_name'),
                     Alashak.name.label('alashak_name'),
-                    ParentLandBank.code.label('parent_code'),
-                    case((LandBank.parent_id == None, total_luas_tanah.c.total), else_=None).label('luas_pemisah'),
-                    case((LandBank.parent_id == None, LandBank.luas_tanah - func.coalesce(total_luas_tanah.c.total, 0)), else_=None).label("sisa_luas")
+                    func.coalesce(total_luas_tanah.c.total_luas, 0).label('luas_pemisah'),
+                    (func.coalesce(LandBank.luas_tanah, 0) - func.coalesce(total_luas_tanah.c.total_luas, 0)).label('sisa_luas'),
+                    land_parent.code.label('parent_code')
                 )
 
         query = query.outerjoin(Project, Project.id == LandBank.project_id
                     ).outerjoin(Desa, Desa.id == LandBank.desa_id
                     ).outerjoin(Company, Company.id == LandBank.company_id
                     ).outerjoin(Alashak, Alashak.id == LandBank.alashak_id
-                    ).outerjoin(ParentLandBank, ParentLandBank.parent_id == LandBank.id
-                    ).outerjoin(total_luas_tanah, total_luas_tanah.c.parent_id == 
-                        case(
-                            (LandBank.parent_id != None, LandBank.parent_id),
-                            else_=LandBank.id
-                        )
-                    )
+                    ).outerjoin(total_luas_tanah, LandBank.id == total_luas_tanah.c.parent_id
+                    ).outerjoin(land_parent, land_parent.id == LandBank.parent_id)
     
         return query
    

@@ -2,6 +2,7 @@ from fastapi import APIRouter, status, HTTPException, Request, Depends
 from sqlmodel import select, or_, cast, String
 from sqlalchemy.orm import selectinload
 from fastapi_pagination import Params
+from schemas.oauth import AccessToken
 from schemas.common_sch import OrderEnumSch
 from schemas.column_type_sch import (ColumnTypeSch, ColumnTypeUpdateSch, ColumnTypeCreateSch, ColumnTypeByIdSch)
 from schemas.response_sch import (PostResponseBaseSch, GetResponseBaseSch, GetResponsePaginatedSch, create_response)
@@ -42,16 +43,14 @@ async def get_by_id(id: str):
 async def create(request: Request, sch: ColumnTypeCreateSch):
     
     """Create a new object"""
-    if hasattr(request.state, 'login_user'):
-        login_user=request.state.login_user
+    login_user : AccessToken = request.state.login_user
     obj = await crud.column_type.create(sch=sch, created_by=login_user.client_id)
     return create_response(data=obj)
 
 @router.put("/{id}", response_model=PostResponseBaseSch[ColumnTypeByIdSch], status_code=status.HTTP_201_CREATED)
 async def update(id: str, request: Request, obj_new: ColumnTypeUpdateSch):
 
-    if hasattr(request.state, 'login_user'):
-        login_user=request.state.login_user
+    login_user : AccessToken = request.state.login_user
     obj_current = await crud.column_type.get(id=id)
     if not obj_current:
         raise HTTPException(status_code=404, detail=f"Jenis Kolom tidak ditemukan")

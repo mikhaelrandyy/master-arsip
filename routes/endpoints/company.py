@@ -2,6 +2,7 @@ from fastapi import APIRouter, status, HTTPException, Request, Depends
 from sqlmodel import select, or_, String, cast
 from sqlalchemy.orm import selectinload
 from fastapi_pagination import Params
+from schemas.oauth import AccessToken
 from schemas.company_sch import (CompanySch, CompanyUpdateSch, CompanyCreateSch, CompanyByIdSch)
 from schemas.response_sch import (PostResponseBaseSch, GetResponseBaseSch, GetResponsePaginatedSch, create_response)
 from schemas.common_sch import OrderEnumSch
@@ -42,17 +43,14 @@ async def get_by_id(id: str):
 async def create(request: Request, sch: CompanyCreateSch):
     
     """Create a new object"""
-    if hasattr(request.state, 'login_user'):
-        login_user=request.state.login_user
+    login_user : AccessToken = request.state.login_user
     obj = await crud.company.create(obj_in=sch, created_by=login_user.client_id)
     return create_response(data=obj)
 
 @router.put("/{id}", response_model=PostResponseBaseSch[CompanyByIdSch], status_code=status.HTTP_201_CREATED)
 async def update(id: str, request: Request, obj_new: CompanyUpdateSch):
     
-    if hasattr(request.state, 'login_user'):
-        login_user = request.state.login_user
-
+    login_user : AccessToken = request.state.login_user
     obj_current = await crud.company.get(id=id)
     if not obj_current:
         raise HTTPException(status_code=404, detail=f"Company tidak ditemukan")

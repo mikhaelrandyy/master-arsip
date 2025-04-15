@@ -45,6 +45,15 @@ async def create(request: Request, sch: AlashakCreateSch):
     
     """Create a new object"""
     login_user : AccessToken = request.state.login_user
+
+    obj_code_current = await crud.alashak.get_by_code_upper(code=sch.code)
+    if obj_code_current:
+        raise HTTPException(status_code=400, detail="Alashak dengan code yang sama sudah tersedia")
+
+    obj_name_current = await crud.alashak.get_by_name_upper(name=sch.name.strip())
+    if obj_name_current:
+            raise HTTPException(status_code=400, detail="Alashak dengan nama yang sama sudah tersedia")
+
     obj = await crud.alashak.create(obj_in=sch, created_by=login_user.client_id)
     return create_response(data=obj)
 

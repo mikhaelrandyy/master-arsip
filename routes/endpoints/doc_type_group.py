@@ -1,6 +1,7 @@
 from fastapi import APIRouter, status, HTTPException, Request, Depends
 from fastapi_pagination import Params
 from sqlmodel import select
+from schemas.oauth import AccessToken
 from schemas.common_sch import OrderEnumSch
 from schemas.doc_type_group_sch import (DocTypeGroupSch, DocTypeGroupUpdateSch, DocTypeGroupCreateSch, DocTypeGroupByIdSch)
 from schemas.response_sch import (PostResponseBaseSch, GetResponseBaseSch, GetResponsePaginatedSch, create_response)
@@ -41,16 +42,20 @@ async def get_by_id(id: str):
 async def create(request: Request, sch: DocTypeGroupCreateSch):
     
     """Create a new object"""
-    if hasattr(request.state, 'login_user'):
-        login_user=request.state.login_user
-    obj = await crud.doc_type_group.create(sch=sch, created_by=login_user.client_id)
+    login_user : AccessToken = request.state.login_user
+
+    obj_name_current = await crud.doc_format.get_by_name_upper(name=sch.name.strip())
+
+    if obj_name_current:
+        raise HTTPException(status_code=400, detail="DOC TYPE GROUP dengan nama yang sama sudah tersedia")
+    
+    obj = await crud.doc_type_group.create(obj_in=sch, created_by=login_user.client_id)
     return create_response(data=obj)
 
 @router.put("/{id}", response_model=PostResponseBaseSch[DocTypeGroupByIdSch], status_code=status.HTTP_201_CREATED)
 async def update(id: str, request: Request, obj_new: DocTypeGroupUpdateSch):
     
-    if hasattr(request.state, 'login_user'):
-        login_user = request.state.login_user
+    login_user : AccessToken = request.state.login_user
     obj_current = await crud.doc_type_group.get(id=id)
     if not obj_current:
         raise HTTPException(status_code=404, detail=f"Document Type Group tidak ditemukan")

@@ -20,11 +20,14 @@ class LandBankSch(LandBankFullBase):
 class LandBankUpdateSch(LandBankBase):
     pass
 
-class LandBankByIdSch(LandBankFullBase):
-    company_name: str
-    company_code: str
-    project_name: str
-    project_code: str
-    desa_name: str
-    alashak_name: str
-    parent_code: str
+class LandBankByIdSch(LandBankSch):
+    pass
+
+# class LandBankByIdSch(LandBankFullBase):
+#     company_name: str
+#     company_code: str
+#     project_name: str
+#     project_code: str
+#     desa_name: str
+#     alashak_name: str
+#     parent_code: str
