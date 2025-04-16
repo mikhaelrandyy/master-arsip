@@ -6,15 +6,15 @@ from pydantic import EmailStr
 
 class WorkflowBase(SQLModel):
     reference_id: str = Field(nullable=False) 
-    txn_id: str | None = Field(nullable=True) #id object workflow
+    txn_id: str | None = Field(nullable=True, default=None) #id object workflow
     step_name: WorkflowStepEnum | None = Field(nullable=True, default=None)
     last_status: WorkflowLastStatusEnum | None = Field(nullable=True, default=None)
-    last_status_at: datetime | None = Field(nullable=True)
-    last_step_app_email: str | None = Field(nullable=True)
-    last_step_app_name: str | None = Field(nullable=True)
-    last_step_app_action: str | None = Field(nullable=True)
-    last_step_app_action_at: datetime | None = Field(nullable=True)
-    last_step_app_action_remarks: str | None = Field(nullable=True)
+    last_status_at: datetime | None = Field(nullable=True, default=None)
+    last_step_app_email: str | None = Field(nullable=True, default=None)
+    last_step_app_name: str | None = Field(nullable=True, default=None)
+    last_step_app_action: str | None = Field(nullable=True, default=None)
+    last_step_app_action_at: datetime | None = Field(nullable=True, default=None)
+    last_step_app_action_remarks: str | None = Field(nullable=True, default=None)
     entity: WorkflowEntityEnum | None = Field(nullable=False)
     flow_id: str | None = Field(nullable=False)
     version: int | None = Field(default=1)
@@ -28,8 +28,8 @@ class Workflow(WorkflowFullBase, table=True):
 
 class WorkflowNextApproverBase(SQLModel):
     workflow_id: str = Field(nullable=False, foreign_key="workflow.id")
-    email: EmailStr | None = Field(nullable=True)
-    name: str | None = Field(nullable=True)
+    email: EmailStr | None = Field(nullable=True, default=None)
+    name: str | None = Field(nullable=True, default=None)
 
 class WorkflowNextApproverFullBase(BaseULIDModel, WorkflowNextApproverBase):
     pass
@@ -40,14 +40,14 @@ class WorkflowNextApprover(WorkflowNextApproverFullBase, table=True):
 
 class WorkflowHistoryBase(SQLModel):
     workflow_id: str | None = Field(foreign_key="workflow.id", nullable=False)
-    step_name: WorkflowStepEnum | None = Field(nullable=True)
-    last_status: WorkflowLastStatusEnum | None = Field(nullable=True)
-    last_status_at: datetime | None = Field(nullable=True)
-    last_step_app_email: str | None = Field(nullable=True)
-    last_step_app_name: str | None = Field(nullable=True)
-    last_step_app_action: str | None = Field(nullable=True)
-    last_step_app_action_at: datetime | None = Field(nullable=True)
-    last_step_app_action_remarks: str | None = Field(nullable=True)
+    step_name: WorkflowStepEnum | None = Field(nullable=True, default=None)
+    last_status: WorkflowLastStatusEnum | None = Field(nullable=True, default=None)
+    last_status_at: datetime | None = Field(nullable=True, default=None)
+    last_step_app_email: str | None = Field(nullable=True, default=None)
+    last_step_app_name: str | None = Field(nullable=True, default=None)
+    last_step_app_action: str | None = Field(nullable=True, default=None)
+    last_step_app_action_at: datetime | None = Field(nullable=True, default=None)
+    last_step_app_action_remarks: str | None = Field(nullable=True, default=None)
 
 class WorkflowHistoryFullBase(BaseULIDModel, WorkflowHistoryBase):
     pass

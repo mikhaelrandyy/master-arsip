@@ -18,8 +18,10 @@ api_router.include_router(project.router, prefix="/project", tags=["PROJECT"])
 api_router.include_router(desa.router, prefix="/desa", tags=["DESA"])
 api_router.include_router(role.router, prefix="/role", tags=["ROLE"])
 api_router.include_router(worker.router, prefix="/worker", tags=["WORKER"])
-api_router.include_router(workflow.router, prefix="/workflow", tags=["WORKFLOW"])
 
+
+api_router_no_auth = APIRouter()
+api_router_no_auth.include_router(workflow.router, prefix="/workflow", tags=["WORKFLOW"])
 
 
 

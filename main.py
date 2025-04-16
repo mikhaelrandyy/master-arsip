@@ -47,6 +47,7 @@ def init_app():
     )
 
     app.include_router(api.api_router, prefix="/arsip")
+    app.include_router(api.api_router_no_auth, prefix="/arsip")
     add_pagination(app)
 
     gunicorn_error_logger = logging.getLogger("gunicorn.error")

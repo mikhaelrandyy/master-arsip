@@ -52,7 +52,7 @@ class CRUDWorkflow(CRUDBase[Workflow, WorkflowCreateSch, WorkflowUpdateSch]):
         obj_updated = await crud.workflow.update(obj_current=obj_current, obj_new=obj_new, with_commit=False)
 
         await self.create_next_approver(sch=sch, obj_updated=obj_updated)
-        await self.create_history(sch=sch, obj_updated=obj_updated, request=request)
+        await self.create_history(sch=sch, obj_updated=obj_updated)
         await self.handle_completed(workflow=obj_updated, request=request)
 
     async def create_history(self, sch:WorkflowSystemCallbackSch, obj_updated:Workflow):
