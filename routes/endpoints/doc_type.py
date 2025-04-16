@@ -56,10 +56,9 @@ async def create(request: Request, sch: DocTypeCreateSch):
 
     login_user : AccessToken = request.state.login_user
 
-    if sch.code:
-        obj_code_exists = await crud.doc_type.get_by_code_upper(code=sch.code)
-        if obj_code_exists:
-            raise HTTPException(status_code=400, detail="Document Type dengan code yang sama sudah eksis")
+    obj_code_exists = await crud.doc_type.get_by_code_upper(code=sch.code)
+    if obj_code_exists:
+        raise HTTPException(status_code=400, detail="Document Type dengan code yang sama sudah eksis")
     
     obj_name_exists = await crud.doc_type.get_by_name_upper(name=sch.name)
     if obj_name_exists:
