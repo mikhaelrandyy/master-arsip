@@ -193,18 +193,47 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
 
         return obj_current
     
-    async def submit(self, *, obj_current: Memo, updated_by: str) -> Memo:
+    async def submit(self, *, obj_current: Memo, updated_by: str, with_commit: bool | None = None) -> Memo:
         
-        workflow = await self.create_workflow(obj_current=obj_current, created_by=updated_by)
+        workflow = await crud.workflow.get_by_reference_id(reference_id=obj_current.id)
 
-        # await self.consume_workflow(workflow=workflow, memo=obj_current)
+        if not workflow:
+            workflow = await self.create_workflow(obj_current=obj_current, created_by=updated_by)
+
+        await self.consume_workflow(workflow=workflow, memo=obj_current)
 
         obj_updated = MemoUpdateSch.model_validate(obj_current)
         obj_updated.workflow_id = workflow.id
 
-        obj_updated = await self.update(obj_current=obj_current, obj_new=obj_updated, updated_by=updated_by)
+        obj_updated = await self.update(obj_current=obj_current, obj_new=obj_updated, updated_by=updated_by, with_commit=with_commit)
+
         return obj_updated
-        
+    
+    async def checked(self, *, obj_current: Memo, memo_docs: list[str], updated_by: str) -> Memo:
+
+        workflow = await crud.workflow.get(id=obj_current.workflow_id)
+
+        if workflow.step_name == WorkflowStepEnum.RECEIVED:
+            
+            for doc in memo_docs:
+                memo_doc_current = await crud.memo_doc.get(id=doc)
+                if memo_doc_current.memo_id != obj_current.id:
+                    raise HTTPException(f"MEMO DOC ID tidak sesuai")
+                            
+                obj_updated = MemoDocUpdateSch.model_validate(memo_doc_current)
+                obj_updated.is_checked = True
+                await crud.memo_doc.update(obj_current=memo_doc_current, obj_in=obj_updated, updated_by=updated_by, with_commit=False)
+
+            doc_not_checked = await crud.memo_doc.get_not_checked(memo_id=obj_current.id, memo_docs=memo_docs)
+
+            if len(doc_not_checked == 0):
+
+                await self.submit(obj_current=obj_current, updated_by=updated_by, with_commit=False)
+
+        await db.session.commit()
+
+        return obj_updated
+    
     async def create_workflow(self, *, obj_current: Memo, created_by: str | None = None):
         template = await crud.workflow_template.get_by_entity(entity=WorkflowEntityEnum.MEMO)
         sch = WorkflowCreateSch(
@@ -247,7 +276,6 @@ class CRUDMemo(CRUDBase[Memo, MemoCreateSch, MemoUpdateSch]):
                 return {"doc_arsip": "keluar_pinjam"}
             case DocumentCategoryEnum.HOLD | DocumentCategoryEnum.UNHOLD:
                 return {"doc_arsip": "hold_unhold"}
-
 
     async def get_by_id(self, *, id:str):
         memo = await self.fetch_memo(id=id)

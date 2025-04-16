@@ -1,5 +1,5 @@
 from fastapi_async_sqlalchemy import db
-from sqlmodel import and_, select
+from sqlmodel import and_, select, or_
 from crud.base_crud import CRUDBase
 from models import (
     MemoDoc,
@@ -10,7 +10,7 @@ from models import (
 from schemas.memo_doc_sch import MemoDocCreateSch, MemoDocUpdateSch
 from schemas.oauth import AccessToken
 from models.memo_model import Memo
-
+import crud
 
 class CRUDMemoDoc(CRUDBase[MemoDoc, MemoDocCreateSch, MemoDocUpdateSch]):
     async def get_by_id(self, *, id:str) -> MemoDoc:
@@ -27,6 +27,17 @@ class CRUDMemoDoc(CRUDBase[MemoDoc, MemoDocCreateSch, MemoDocUpdateSch]):
         response = await db.session.execute(query)
         return response.scalars().all()
     
+    async def get_not_checked(self,  *, memo_id:str, memo_docs:list[str]) -> list[MemoDoc]:
+
+        query = select(MemoDoc)
+        query = query.where(and_(MemoDoc.memo_id == memo_id,
+                                 MemoDoc.is_checked == False,
+                                 MemoDoc.id.notin_(memo_docs)
+                                )
+                            )
+        response = await db.session.execute(query)
+        return response.scalars().all()
+
     async def fetch_by_memo(self, **kwargs):
         query = self.base_query()
         query = self.create_filter(query=query, filter=kwargs)

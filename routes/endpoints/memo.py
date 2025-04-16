@@ -81,6 +81,22 @@ async def submit(request: Request, id: str):
     response_obj = await crud.memo.get_by_id(id=obj.id)
     return create_response(data=response_obj)
 
+@router.post("/checked", response_model=PostResponseBaseSch[MemoSch],  status_code=status.HTTP_200_OK)
+async def checked(request: Request, memo_id:str, memo_docs:list[str]):
+
+    login_user: AccessToken = request.state.login_user
+
+    obj_current = await crud.memo.get(id=memo_id)
+    if not obj_current:
+        raise HTTPException(status_code=404, detail=f"Memo tidak ditemukan!")
+    
+    obj = await crud.memo.checked(obj_current=obj_current, memo_docs=memo_docs, updated_by=login_user.client_id)
+
+    return create_response(data=obj)
+
+
+
+
 
 
 

@@ -18,6 +18,7 @@ class MemoDocBase(SQLModel):
     physical_doc_type: PhysicalDocTypeEnum = Field(nullable=False)
     remarks: str | None = Field(nullable=True)
     vendor_id: str | None = Field(nullable=True)
+    is_checked: bool | None = Field(nullable=True, default=False)
 
 class MemoDocFullBase(BaseULIDModel, MemoDocBase):
     pass
