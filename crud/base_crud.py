@@ -41,7 +41,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         self, *, code: str | None = None, db_session: AsyncSession | None = None
     ) -> ModelType | None:
         db_session = db_session or db.session
-        query = select(self.model).where(func.upper(self.model.code) == code.upper())
+        query = select(self.model).where(func.upper(self.model.code) == (code or '').upper())
         response = await db_session.execute(query)
         return response.scalar_one_or_none()
     
@@ -49,7 +49,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         self, *, name: str | None = None, db_session: AsyncSession | None = None
     ) -> ModelType | None:
         db_session = db_session or db.session
-        query = select(self.model).where(func.upper(self.model.name) == name.upper())
+        query = select(self.model).where(func.upper(self.model.name) == (name or '').upper())
         response = await db_session.execute(query)
         return response.scalar_one_or_none()
 
