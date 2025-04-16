@@ -20,7 +20,9 @@ class DocTypeBase(SQLModel):
 
     @field_validator('code')
     def validate_code(cls, value):
-        return value.upper()
+        if value:
+            return value.upper()
+        return value
     
     @field_validator('name')
     def validate_name(cls, value):
